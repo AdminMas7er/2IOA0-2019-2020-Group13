@@ -2,7 +2,7 @@
 
 This is the repo for Goup 13 for the 2019-2020 edition of the course 2IOA0 DBL HTI+Webtech
 
-##FOR THOSE WHO WANT TO WORK ON PYTHON STUFF AND  DOWNLOAD THE FILES 
+## FOR THOSE WHO WANT TO WORK ON PYTHON STUFF AND  DOWNLOAD THE FILES 
 
 ** You _need_ to do these steps first:**
 1. Make sure you have the **latest** version of Python installed (3.8), if you don't you can
