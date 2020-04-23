@@ -4,7 +4,8 @@ This is the repo for Goup 13 for the 2019-2020 edition of the course 2IOA0 DBL H
 
 ## FOR THOSE WHO WANT TO WORK ON PYTHON STUFF AND  DOWNLOAD THE FILES 
 
-**You  _need_  to do these steps first:**
+**You  need  to do these steps first:**
+
 1. Make sure you have the **latest** version of Python installed (3.8), if you don't you can
 download it from [here] (https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe)
 
