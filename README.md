@@ -13,7 +13,7 @@ download it from [here] (https://www.python.org/ftp/python/3.8.1/python-3.8.1-am
 **ALWAYS DO THESE STEPS EVERYTIME YOU WANT TO RUN THE APP WHEN YOU OPEN THE COMMAND LINE FOR THE FIRST TIME**
 
 3. in the command line, put the following code (here it depends per laptop but I assume you use the TUe one):
-  ```cd C:\Users\Your "2018-" or "2019-" number here\Desktop\File Name ```
+```cd C:\Users\Your "2018-" or "2019-" number here\Desktop\File Name ```
 
 4. Create a virtual enviroment (in command line):
 ```py -3 -m venv venv```
