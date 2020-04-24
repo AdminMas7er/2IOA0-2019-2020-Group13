@@ -7,11 +7,10 @@
 {% block body %}
 
 <h1> Hello World!</h1>
-<!--
-This is the body, so all html code is put here
-h1 is a header, so just a title, which i now put in to
-show that the page works
--->
+<form method ="post" enctype="multipart/form-data">
+    <input type="file" name="file"/>
+    <input type="submit" value ="Upload"/>
+  </form>
 {% endblock %}
 
 
