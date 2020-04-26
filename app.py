@@ -39,7 +39,7 @@ def upload_file():
     
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    data=pd.read_csv(filename,encoding = "cp1252")
+    data=pd.read_csv(filename,encoding = "latin1",delim_whitespace=True)
     return render_template("table.html",name=filename,data=data)
 if __name__=="__main__":
     app.run(debug=True)
