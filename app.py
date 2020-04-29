@@ -1,15 +1,14 @@
 import os
+import app
 from  flask import Flask,flash,render_template,request,redirect,url_for,send_from_directory
 from werkzeug.utils import secure_filename
 import pandas as pd
 
 UPLOAD_FOLDER = './uploads' #MAKE SURE TO CREATE A FOLDER FOR THIS IN THE CODE FOLDER
-ALLOWED_EXTENSIONS = {'csv'}
-
-
-
+ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
 
 app=Flask(__name__)
+app.secret_key = "key
 #configuring the upload folder and the maximum size
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
@@ -40,7 +39,9 @@ def upload_file():
     
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    data=pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'],filename),encoding = "latin1",delim_whitespace=True)
+    if filename.endswith('.csv'):
+        global data
+        data=pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'],filename),encoding = "latin1",delim_whitespace=True)
     return render_template("table.html",name=filename,data=data)
 if __name__=="__main__":
     app.run(debug=True)

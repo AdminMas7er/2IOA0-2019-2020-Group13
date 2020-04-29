@@ -6,10 +6,16 @@
 
 {% block body %}
 
-<h1> Hello World!</h1>
-<form method ="post" enctype="multipart/form-data">
+
+<h1>Hi! First upload the CSV file below</h1>
+<form method ="post" name="aform" enctype="multipart/form-data">
     <input type="file" name="file"/>
-    <input type="submit" value ="Upload"/>
+    <input type="submit" name="asubmit" value ="Upload"/>
+  </form>
+<h2>Then, upload the stimuli image</h2>
+<form method ="post" name="bform" enctype="multipart/form-data">
+    <input type="file" name="file"/>
+    <input type="submit"  name="bsubmit" value ="Upload"/>
   </form>
 {% endblock %}
 
