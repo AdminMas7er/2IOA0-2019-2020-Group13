@@ -8,7 +8,7 @@ UPLOAD_FOLDER = './uploads' #MAKE SURE TO CREATE A FOLDER FOR THIS IN THE CODE F
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
 
 app=Flask(__name__)
-app.secret_key = "key
+app.secret_key = "key"
 #configuring the upload folder and the maximum size
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
