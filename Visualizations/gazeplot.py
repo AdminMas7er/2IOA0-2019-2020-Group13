@@ -2,7 +2,7 @@ import pandas as pd
 import random
 import numpy as np
 from PIL import Image
-from bokeh.plotting import figure, output_file, show, ColumnDataSource
+from bokeh.plotting import figure, output_file, show
 from bokeh.palettes import turbo
 
 data = pd.read_csv("/Users/20190864/OneDrive - TU Eindhoven/Yemoe/TUe/Year 1/Quartile 4/DBL + Webtech/MetroMapsEyeTracking/all_fixation_data_cleaned_up.csv", encoding='latin1', delim_whitespace = True)
@@ -14,8 +14,6 @@ stimuli_url = '/Users/20190864/OneDrive - TU Eindhoven/Yemoe/TUe/Year 1/Quartile
 
 stimuli_filter=data['StimuliName']==stimuli
 mapped=data[stimuli_filter]
-
-user_array=mapped['user'].unique()
 
 user_array=mapped['user'].unique()
 
