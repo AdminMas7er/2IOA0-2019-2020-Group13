@@ -1,5 +1,6 @@
 import pandas as pd
 import random
+import numpy as np
 from PIL import Image
 from bokeh.plotting import figure, output_file, show, ColumnDataSource
 from bokeh.palettes import turbo
@@ -16,19 +17,9 @@ mapped=data[stimuli_filter]
 
 user_array=mapped['user'].unique()
 
+user_array=mapped['user'].unique()
+
 palette = turbo(256)
-
-specific_color = []
-
-for user in user_array:
-    specific_color.append(palette[random.randint(0,255)])
-
-mapped['color']=""
-
-j=0
-for i in user_array:
-   mapped.loc[mapped['user'] == i, 'color'] = specific_color[j]
-   j=j+1
 
 img =  Image.open(stimuli_url)
 width, height = img.size
@@ -41,9 +32,17 @@ def bokeh_imshow():
 
         p.image_url(url=[stimuli_url], x=0, y=0, h=height, w=width, alpha=1)
 
+        j=0
+        specific_color = []
+
         for user in user_array:
+                specific_color.append(palette[random.randint(0,255)])
+                mapped.loc[mapped['user'] == user, 'color'] = specific_color[j]
+                j=j+1
+                index = (np.where(user_array==user))[0][0]
+                color = '#' + str(specific_color[index][1:])
                 points=mapped[mapped['user']==user].sort_values(by='Timestamp')
-                p.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.65, color="black")
+                p.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.65, color=color)
                 p.circle(points['MappedFixationPointX'], points['MappedFixationPointY'],size=(points['FixationDuration']/25), color=points['color'], alpha=0.85)
         
         show(p)  # open a browser
