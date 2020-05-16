@@ -1,3 +1,5 @@
+#needs to be pasted and run in the same directory folder where your python is installed
+
 import pandas as pd
 import random
 import numpy as np
