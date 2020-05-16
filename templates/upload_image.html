@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block body %}
+
+
+</form>
+<h2>Upload the desired stimuli image</h2>
+<form method ="post" name="bform" enctype="multipart/form-data">
+    <dl>
+      <p>
+        <input type="file" name="file"/>
+      </p>
+    </dl>
+    <p>
+    <input type="submit"  name="bsubmit" value ="Upload"/>
+  </p>
+  </form>
+
+{% endblock %}
