@@ -8,14 +8,7 @@ import numpy as np
 from PIL import Image
 from bokeh.plotting import figure, output_file, show
 from bokeh.palettes import turbo
-import matplotlib.image
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-from matplotlib.pyplot import imshow
-import seaborn as sns
 
-sns.set()
 UPLOAD_FOLDER = './uploads' #MAKE SURE TO CREATE A FOLDER FOR THIS IN THE CODE FOLDER
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
 
@@ -55,10 +48,12 @@ def initial_upload_file():
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
                 data_url = os.path.join(app.config['UPLOAD_FOLDER'],filename)
                 return redirect(url_for('csv_file'))
+                #return redirect(url_for('image_generate'))
+
     return render_template("index.html")     
 
 @app.route('/uploads/csv',methods=['GET','POST'])
-def csv_file(): #if the first file uploaded is a csv file, and image needs to be uploaded
+def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
 
     global stimuli, stimuli_url
 
@@ -85,11 +80,37 @@ def csv_file(): #if the first file uploaded is a csv file, and image needs to be
 @app.route('/image_generate')
 def image_generate():
 
+    output_file('image.html')
     global data, data_url
-    print(data_url)
     data=pd.read_csv(data_url,encoding = "latin1",delim_whitespace=True)
+    stimuli_filter=data['StimuliName']==stimuli
+    mapped=data[stimuli_filter]
 
-    return render_template("blank.html")
+    user_array=mapped['user'].unique()
+
+    palette = turbo(256)
+
+    img =  Image.open(stimuli_url)
+    width, height = img.size
+
+    p = figure(plot_width = 900, plot_height=700, x_range=(0,width), y_range=(height,0))
+
+    p.image_url(url=[stimuli_url], x=0, y=0, h=height, w=width, alpha=1)
+
+    j=0
+    specific_color = []
+
+    for user in user_array:
+        specific_color.append(palette[random.randint(0,255)])
+        mapped.loc[mapped['user'] == user, 'color'] = specific_color[j]
+        j=j+1
+        index = (np.where(user_array==user))[0][0]
+        color = '#' + str(specific_color[index][1:])
+        points=mapped[mapped['user']==user].sort_values(by='Timestamp')
+        p.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.65, color=color)
+        p.circle(points['MappedFixationPointX'], points['MappedFixationPointY'],size=(points['FixationDuration']/25), color=points['color'], alpha=0.85)
+
+    show(p)
 
 if __name__=="__main__":
     app.run(debug=True)
