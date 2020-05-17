@@ -8,6 +8,8 @@ import numpy as np
 from PIL import Image
 from bokeh.plotting import figure, output_file, show
 from bokeh.palettes import turbo
+from bokeh.embed import components
+from bokeh.resources import INLINE
 
 UPLOAD_FOLDER = './uploads' #MAKE SURE TO CREATE A FOLDER FOR THIS IN THE CODE FOLDER
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
@@ -48,7 +50,6 @@ def initial_upload_file():
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
                 data_url = os.path.join(app.config['UPLOAD_FOLDER'],filename)
                 return redirect(url_for('csv_file'))
-                #return redirect(url_for('image_generate'))
 
     return render_template("index.html")     
 
@@ -73,14 +74,14 @@ def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
             file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
             stimuli = filename
             stimuli_url = os.path.join(app.config['UPLOAD_FOLDER'],filename)
-            return redirect(url_for('image_generate'))    
+            return redirect(url_for('gazeplot_generate'))    
 
     return render_template("upload_image.html")   
 
 @app.route('/image_generate')
-def image_generate():
+def gazeplot_generate():
 
-    output_file('image.html')
+    #output_file('image.html')
     global data, data_url
     data=pd.read_csv(data_url,encoding = "latin1",delim_whitespace=True)
     stimuli_filter=data['StimuliName']==stimuli
@@ -93,9 +94,9 @@ def image_generate():
     img =  Image.open(stimuli_url)
     width, height = img.size
 
-    p = figure(plot_width = 900, plot_height=700, x_range=(0,width), y_range=(height,0))
+    plot = figure(plot_width = 900, plot_height=700, x_range=(0,width), y_range=(height,0))
 
-    p.image_url(url=[stimuli_url], x=0, y=0, h=height, w=width, alpha=1)
+    #plot.image_url(url=[stimuli_url], x=0, y=0, h=height, w=width, alpha=1)
 
     j=0
     specific_color = []
@@ -107,10 +108,17 @@ def image_generate():
         index = (np.where(user_array==user))[0][0]
         color = '#' + str(specific_color[index][1:])
         points=mapped[mapped['user']==user].sort_values(by='Timestamp')
-        p.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.65, color=color)
-        p.circle(points['MappedFixationPointX'], points['MappedFixationPointY'],size=(points['FixationDuration']/25), color=points['color'], alpha=0.85)
+        plot.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.65, color=color)
+        plot.circle(points['MappedFixationPointX'], points['MappedFixationPointY'],size=(points['FixationDuration']/25), color=points['color'], alpha=0.85)
 
-    show(p)
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    script, div = components(plot)
+    #image_url = url_for('uploads', filename=stimuli)
+    #image = os.path.join(app.config['UPLOAD_FOLDER'], stimuli)
+
+    return render_template('layout.html', plot_script=script, plot_div=div, js_resources=js_resources, css_resources=css_resources, stimuli = stimuli)
 
 if __name__=="__main__":
     app.run(debug=True)
