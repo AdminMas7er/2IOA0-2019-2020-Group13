@@ -34,7 +34,6 @@ def initial_upload_file():
     global stimuli, stimuli_url, data_url
 
     if request.method== 'POST': #if the transfer is Secure
-        print("yes")
         #checks if the post has the file
         if 'file' not in request.files:
             flash('no file part') #if the file is not there, get an error
@@ -69,7 +68,7 @@ def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
             flash('no selected file')
             return redirect(request.url)
 
-        if file and (file.filename.endswith('.jpg') or file.filename.endswith('.jpeg')):
+        if file and allowed_file(file.filename):
             filename=secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
             stimuli = filename
@@ -81,8 +80,7 @@ def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
 @app.route('/image_generate')
 def gazeplot_generate():
 
-    #output_file('image.html')
-    global data, data_url
+    global data, data_url, stimuli_url
     data=pd.read_csv(data_url,encoding = "latin1",delim_whitespace=True)
     stimuli_filter=data['StimuliName']==stimuli
     mapped=data[stimuli_filter]
@@ -94,9 +92,11 @@ def gazeplot_generate():
     img =  Image.open(stimuli_url)
     width, height = img.size
 
-    plot = figure(plot_width = 900, plot_height=700, x_range=(0,width), y_range=(height,0))
+    directory = os.path.dirname(os.path.realpath(__file__))[2:]
+    newPath = directory.replace(os.sep, '/') + '/' + stimuli
 
-    #plot.image_url(url=[stimuli_url], x=0, y=0, h=height, w=width, alpha=1)
+    plot = figure(plot_width = 900, plot_height=700, x_range=(0,width), y_range=(height,0))
+    plot.image_url(url=[newPath], x=0, y=0, h=height, w=width, alpha=1)
 
     j=0
     specific_color = []
@@ -115,10 +115,8 @@ def gazeplot_generate():
     css_resources = INLINE.render_css()
 
     script, div = components(plot)
-    #image_url = url_for('uploads', filename=stimuli)
-    #image = os.path.join(app.config['UPLOAD_FOLDER'], stimuli)
 
-    return render_template('layout.html', plot_script=script, plot_div=div, js_resources=js_resources, css_resources=css_resources, stimuli = stimuli)
+    return render_template('layout.html', plot_script=script, plot_div=div, js_resources=js_resources, css_resources=css_resources, newPath=newPath)
 
 if __name__=="__main__":
     app.run(debug=True)
