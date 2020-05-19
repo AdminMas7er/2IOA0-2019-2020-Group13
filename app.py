@@ -9,7 +9,6 @@ from PIL import Image
 from bokeh.plotting import figure, output_file, show
 from bokeh.palettes import turbo
 from bokeh.embed import components
-from bokeh.resources import INLINE
 
 UPLOAD_FOLDER = './uploads' #MAKE SURE TO CREATE A FOLDER FOR THIS IN THE CODE FOLDER
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
@@ -74,7 +73,6 @@ def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
             stimuli = filename
             stimuli_url = os.path.join(app.config['UPLOAD_FOLDER'],filename)
             return redirect(url_for('gazeplot_generate'))    
-
     return render_template("upload_image.html")   
 
 @app.route('/image_generate')
@@ -95,7 +93,7 @@ def gazeplot_generate():
     directory = os.path.dirname(os.path.realpath(__file__))[2:]
     newPath = directory.replace(os.sep, '/') + '/' + stimuli
 
-    plot = figure(plot_width = 900, plot_height=700, x_range=(0,width), y_range=(height,0))
+    plot = figure(plot_width =600 , plot_height=700, x_range=(0,width), y_range=(height,0))
     plot.image_url(url=[newPath], x=0, y=0, h=height, w=width, alpha=1)
 
     j=0
@@ -111,12 +109,8 @@ def gazeplot_generate():
         plot.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.65, color=color)
         plot.circle(points['MappedFixationPointX'], points['MappedFixationPointY'],size=(points['FixationDuration']/25), color=points['color'], alpha=0.85)
 
-    js_resources = INLINE.render_js()
-    css_resources = INLINE.render_css()
-
-    script, div = components(plot)
-
-    return render_template('layout.html', plot_script=script, plot_div=div, js_resources=js_resources, css_resources=css_resources, newPath=newPath)
+    script, div = components(plot,wrap_script=False)
+    return render_template('layout.html', plot_script=script, plot_div=div)
 
 if __name__=="__main__":
     app.run(debug=True)
