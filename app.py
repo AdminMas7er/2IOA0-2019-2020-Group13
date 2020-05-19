@@ -111,6 +111,5 @@ def gazeplot_generate():
 
     script, div = components(plot,wrap_script=False)
     return render_template('layout.html', plot_script=script, plot_div=div)
-
 if __name__=="__main__":
     app.run(debug=True)
