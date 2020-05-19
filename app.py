@@ -93,7 +93,7 @@ def gazeplot_generate():
     directory = os.path.dirname(os.path.realpath(__file__))[2:]
     newPath = directory.replace(os.sep, '/') + '/' + stimuli
 
-    plot = figure(plot_width =600 , plot_height=700, x_range=(0,width), y_range=(height,0))
+    plot = figure(plot_width =800 , plot_height=700, x_range=(0,width), y_range=(height,0))
     plot.image_url(url=[newPath], x=0, y=0, h=height, w=width, alpha=1)
 
     j=0

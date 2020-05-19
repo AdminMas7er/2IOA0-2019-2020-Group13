@@ -24,12 +24,19 @@
     
   </head>
   <body>
-    <div id="app">
-      <template>
-          {{ plot_div |safe }}
-         
-        </template>
-      </div>
+    <div id="tab">
+      <b-card no-body>
+        <b-tabs card>
+            <b-tab no-body title="Gaze plot">
+            {{ plot_div |safe }}
+          </b-tab>
+          <b-tab title="Heat Map">
+            <b-card-title>This is where the <code>Heat map in bokeh</code> is supposed to be</b-card-title>
+          </b-tab>
+        </b-tabs>
+          
+      </b-card>
+    </div>
       <script>
           {{ plot_script|safe}}
         </script>
@@ -38,7 +45,7 @@
     
     <script>
     var app=new Vue( {
-      el:'#app',
+      el:'#tab',
       props: {
         plot: Object
       },
