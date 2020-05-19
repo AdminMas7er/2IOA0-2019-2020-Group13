@@ -4,15 +4,10 @@
     <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>Embed Demo</title>
-    'Access-Control-Allow-Origin' '*';
     <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.0.2.min.js"></script>
         <script type="text/javascript">
             Bokeh.set_log_level("info");
         </script>
-    <script src={{newPath}}></script>
-    {{ js_resources|safe }}
-    {{ css_resources|safe }}
-    {{ plot_script|safe }}
   </head>
   <body>
     {{ plot_div|safe }}

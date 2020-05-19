@@ -9,7 +9,6 @@ from PIL import Image
 from bokeh.plotting import figure, output_file, show
 from bokeh.palettes import turbo
 from bokeh.embed import components
-from bokeh.resources import INLINE
 
 UPLOAD_FOLDER = './uploads' #MAKE SURE TO CREATE A FOLDER FOR THIS IN THE CODE FOLDER
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
@@ -110,9 +109,6 @@ def gazeplot_generate():
         points=mapped[mapped['user']==user].sort_values(by='Timestamp')
         plot.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.65, color=color)
         plot.circle(points['MappedFixationPointX'], points['MappedFixationPointY'],size=(points['FixationDuration']/25), color=points['color'], alpha=0.85)
-
-    js_resources = INLINE.render_js()
-    css_resources = INLINE.render_css()
 
     script, div = components(plot)
 
