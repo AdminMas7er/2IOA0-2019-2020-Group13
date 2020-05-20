@@ -1,6 +1,6 @@
 import os
 import app
-from  flask import Flask,flash,render_template,request,redirect,url_for,send_from_directory
+from  flask import Flask,flash,render_template,request,redirect,url_for,send_from_directory,session
 from werkzeug.utils import secure_filename
 import pandas as pd
 import random
@@ -30,7 +30,6 @@ def allowed_file(filename):
 
 @app.route('/',methods=['GET','POST']) #http methods, GET is managing information not secure, POST is Secure
 def initial_upload_file():
-    global stimuli, stimuli_url, data_url
 
     if request.method== 'POST': #if the transfer is Secure
         #checks if the post has the file
@@ -47,14 +46,14 @@ def initial_upload_file():
                 filename=secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
                 data_url = os.path.join(app.config['UPLOAD_FOLDER'],filename)
-                return redirect(url_for('csv_file'))
+                return redirect(url_for('csv_file')+'/'+filename)
 
     return render_template("index.html")     
 
 @app.route('/uploads/csv',methods=['GET','POST'])
 def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
 
-    global stimuli, stimuli_url
+    
 
     if request.method== 'POST': #if the transfer is Secure
         #checks if the post has the file
@@ -70,16 +69,15 @@ def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
         if file and allowed_file(file.filename):
             filename=secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
-            stimuli = filename
-            stimuli_url = os.path.join(app.config['UPLOAD_FOLDER'],filename)
+            
+            
             return redirect(url_for('gazeplot_generate'))    
     return render_template("upload_image.html")   
 
-@app.route('/image_generate')
-def gazeplot_generate():
-
-    global data, data_url, stimuli_url
-    data=pd.read_csv(data_url,encoding = "latin1",delim_whitespace=True)
+@app.route('/image_generate/<dataset>/<stimuli>/')
+def gazeplot_generate(stimuli,dataset):
+    stimuli_url = os.path.join(app.config['UPLOAD_FOLDER'],stimuli)
+    data=pd.read_csv(secure_filename(dataset),encoding = "latin1",delim_whitespace=True)
     stimuli_filter=data['StimuliName']==stimuli
     mapped=data[stimuli_filter]
 
