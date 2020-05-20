@@ -43,18 +43,15 @@ def initial_upload_file():
             return redirect(request.url) 
             
         if file and allowed_file(file.filename):
-                filename=secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
-                data_url = os.path.join(app.config['UPLOAD_FOLDER'],filename)
-                return redirect(url_for('csv_file')+'/'+filename)
+                dataset=secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'],dataset))
+                data_url = os.path.join(app.config['UPLOAD_FOLDER'],dataset)
+                return redirect(url_for('csv_file',data_url=data_url))
 
     return render_template("index.html")     
 
-@app.route('/uploads/csv',methods=['GET','POST'])
-def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
-
-    
-
+@app.route('/uploads/<data_url>',methods=['GET','POST'])
+def csv_file(data_url): #file uploaded is a csv file, and image needs to be uploaded
     if request.method== 'POST': #if the transfer is Secure
         #checks if the post has the file
         if 'file' not in request.files:
@@ -67,17 +64,16 @@ def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
             return redirect(request.url)
 
         if file and allowed_file(file.filename):
-            filename=secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
+            stimuli=secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'],stimuli))
             
-            
-            return redirect(url_for('gazeplot_generate'))    
+            return redirect(url_for('gazeplot_generate',stimuli=stimuli,data_url=data_url))    
     return render_template("upload_image.html")   
 
-@app.route('/image_generate/<dataset>/<stimuli>/')
-def gazeplot_generate(stimuli,dataset):
+@app.route('/image_generate/<data_url>/<stimuli>/')
+def gazeplot_generate(stimuli,data_url):
     stimuli_url = os.path.join(app.config['UPLOAD_FOLDER'],stimuli)
-    data=pd.read_csv(secure_filename(dataset),encoding = "latin1",delim_whitespace=True)
+    data=pd.read_csv(data_url,encoding = "latin1",delim_whitespace=True)
     stimuli_filter=data['StimuliName']==stimuli
     mapped=data[stimuli_filter]
 
@@ -91,7 +87,7 @@ def gazeplot_generate(stimuli,dataset):
     directory = os.path.dirname(os.path.realpath(__file__))[2:]
     newPath = directory.replace(os.sep, '/') + '/' + stimuli
 
-    plot = figure(plot_width =900 , plot_height=900, x_range=(0,width), y_range=(0,height))
+    plot = figure(plot_width =800 , plot_height=700, x_range=(0,width), y_range=(0,height))
     plot.image_url(url=[newPath], x=0, y=0, h=height, w=width, alpha=1)
 
     j=0
