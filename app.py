@@ -6,9 +6,10 @@ import pandas as pd
 import random
 import numpy as np
 from PIL import Image
-from bokeh.plotting import figure, output_file, show
+from bokeh.plotting import figure, output_file, show, save
 from bokeh.palettes import turbo
 from bokeh.embed import components
+from bokeh.resources import CDN, INLINE
 
 UPLOAD_FOLDER = './uploads' #MAKE SURE TO CREATE A FOLDER FOR THIS IN THE CODE FOLDER
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
@@ -51,7 +52,7 @@ def initial_upload_file():
 
     return render_template("index.html")     
 
-@app.route('/uploads/csv',methods=['GET','POST'])
+@app.route('/uploads',methods=['GET','POST'])
 def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
 
     global stimuli, stimuli_url
@@ -78,6 +79,8 @@ def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
 
 @app.route('/image_generate')
 def gazeplot_generate():
+
+    output_file('image.html', mode='inline')
 
     global data, data_url, stimuli_url
     data=pd.read_csv(data_url,encoding = "latin1",delim_whitespace=True)
@@ -110,9 +113,10 @@ def gazeplot_generate():
         plot.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.65, color=color)
         plot.circle(points['MappedFixationPointX'], points['MappedFixationPointY'],size=(points['FixationDuration']/25), color=points['color'], alpha=0.85)
 
-    script, div = components(plot)
+    script, div = components(plot, INLINE)
+    show(plot)
 
-    return render_template('layout.html', plot_script=script, plot_div=div, js_resources=js_resources, css_resources=css_resources, newPath=newPath)
+    return render_template('layout.html', plot_script=script, plot_div=div)
 
 if __name__=="__main__":
     app.run(debug=True)
