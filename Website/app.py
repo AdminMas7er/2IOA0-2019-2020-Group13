@@ -52,7 +52,7 @@ def initial_upload_file():
 
     return render_template("index.html")     
 
-@app.route('/uploads/csv',methods=['GET','POST'])
+@app.route('/uploads',methods=['GET','POST'])
 def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
 
     global stimuli, stimuli_url
