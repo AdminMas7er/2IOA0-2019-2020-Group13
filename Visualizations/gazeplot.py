@@ -24,7 +24,7 @@ palette = turbo(256)
 img =  Image.open(stimuli_url)
 width, height = img.size
 
-def bokeh_imshow(): 
+def gazeplot_show(): 
     
         output_file('image.html')
 
@@ -47,4 +47,4 @@ def bokeh_imshow():
         
         show(p)  # open a browser
 
-bokeh_imshow()
+gazeplot_show()
