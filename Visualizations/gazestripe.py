@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import time
 from PIL import Image
 
 from bokeh.io import show
@@ -7,9 +8,9 @@ from bokeh.models import FixedTicker, FuncTickFormatter, ColumnDataSource
 from bokeh.plotting import figure, show, output_file
 from bokeh.transform import dodge
 
-data = pd.read_csv("/Users/20190864/OneDrive - TU Eindhoven/Yemoe/TUe/Year 1/Quartile 4/DBL + Webtech/MetroMapsEyeTracking/all_fixation_data_cleaned_up.csv", encoding='latin1', delim_whitespace = True)
+#start = time.process_time()
 
-output_file('image.html', mode="inline")
+data = pd.read_csv("/Users/20190864/OneDrive - TU Eindhoven/Yemoe/TUe/Year 1/Quartile 4/DBL + Webtech/MetroMapsEyeTracking/all_fixation_data_cleaned_up.csv", encoding='latin1', delim_whitespace = True)
 
 stimuli = '01_Antwerpen_S1.jpg'
 stimuli_url = '/Users/20190864/OneDrive - TU Eindhoven/Yemoe/TUe/Year 1/Quartile 4/DBL + Webtech/MetroMapsEyeTracking/stimuli/01_Antwerpen_S1.jpg'
@@ -19,45 +20,48 @@ mapped=data[stimuli_filter]
 
 user_array=mapped['user'].unique()
 
-#img =  Image.open(stimuli_url)
-#width, height = img.size
+def gazestripe_show():
 
-coordinates = list(mapped[['MappedFixationPointX', 'MappedFixationPointY']].itertuples(index=False, name=None))
-psize = 100
+    output_file('image.html', mode="inline")
 
-img = Image.open(stimuli_url).convert('RGBA')
-cropped_images = []
+    coordinates_pairs = mapped[['MappedFixationPointX', 'MappedFixationPointY']].itertuples(index=False, name=None)
+    coordinates = list(coordinates_pairs) #converts points in dataframe to a list of tuples of coordinates such as (x1, y1), (x2, y2), ...
 
-for x, y in coordinates:
-    box = (x - psize / 2, y - psize / 2, x + psize / 2, y + psize / 2)
-    cropped_images.append(np.array(img.crop(box)).view(np.uint32)[::-1])
+    psize = 200 #size in pixels of cropped image
 
-mapped['Image'] = cropped_images
+    image = Image.open(stimuli_url)
+    img = image.convert('RGBA') #converts to RGBA image to use
 
-for u in user_array:
-    udf = (mapped['user'] == u)
-    mapped.loc[udf, 'Timestamp'] = np.arange(udf.sum())
+    cropped_images = []
 
-user_coords = dict(zip(user_array, range(mapped.shape[0])))
-mapped['UserCoord'] = mapped['user'].replace(user_coords)
+    for x, y in coordinates:
+       box = (x - psize / 2, y - psize / 2, x + psize / 2, y + psize / 2) #box is in format of (x1, y1, x2, y2) - x1y1 are top left and x2y2 are bottom right
+       cropped_images.append(np.array(img.crop(box)).view(np.uint32)[::-1])
 
-p = figure(match_aspect=True)
-for r in [p.xaxis, p.xgrid, p.ygrid]:
-    r.visible = False
+    mapped['Image'] = cropped_images
 
-p.yaxis.ticker = FixedTicker(ticks=list(user_coords.values()))
-p.yaxis.formatter = FuncTickFormatter(args=dict(rev_user_coords={v: k for k, v in user_coords.items()}), code="return rev_user_coords[tick];")
+    for user in user_array:
+        mapped.loc[(mapped['user'] == user), 'Timestamp'] = np.arange((mapped['user'] == user).sum())
 
-ds = ColumnDataSource(mapped)
-img_size = 1
-p.image_rgba(image='Image',
-             x=dodge('Timestamp', -img_size / 2), y=dodge('UserCoord', -img_size / 2),
-             dw=img_size, dh=img_size, source=ds)
-#p.rect(x='TimeCoord', y='UserCoord', width=img_size, height=img_size, source=ds,
-       #line_dash='dashed', fill_alpha=0)
+    user_row = dict(zip(user_array, range(user_array.shape[0]))) #stores row of each user where output should be printed, eg. - p1:0 -> output of user p1 is stored in row 0(row 1)
+    mapped['UserRow'] = mapped['user'].replace(user_row)
 
-show(p)
+    plot = figure(plot_width = 1500, plot_height=700, match_aspect=True)
 
-#p = figure(plot_width = 900, plot_height=700, x_range=(0,width), y_range=(height,0))
+    plot.xaxis.visible = False
+    plot.xgrid.visible = False
+    plot.ygrid.visible = False
 
-#p.image_url(url=[stimuli_url], x=0, y=0, h=height, w=width, alpha=1)
+    plot.yaxis.ticker = list(user_row.values())
+    plot.yaxis.formatter = FuncTickFormatter(args=dict(user_coords={v: k for k, v in user_row.items()}), code="return user_coords[tick];") #names each tick according to user
+
+    ds = ColumnDataSource(mapped)
+
+    img_size = 1
+    plot.image_rgba(image='Image', x='Timestamp', y='UserRow', dw=img_size, dh=img_size, source=ds) #plots each image in gaze stripe
+
+    show(plot)
+
+gazestripe_show()
+
+#print("Time taken to process image of " + str(psize) + " pixels each is " + str(time.process_time() - start) + " seconds", flush=True)
