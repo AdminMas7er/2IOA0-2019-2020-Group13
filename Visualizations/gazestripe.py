@@ -4,9 +4,8 @@ import time
 from PIL import Image
 
 from bokeh.io import show
-from bokeh.models import FixedTicker, FuncTickFormatter, ColumnDataSource
+from bokeh.models import FuncTickFormatter, ColumnDataSource
 from bokeh.plotting import figure, show, output_file
-from bokeh.transform import dodge
 
 #start = time.process_time()
 
@@ -27,7 +26,7 @@ def gazestripe_show():
     coordinates_pairs = mapped[['MappedFixationPointX', 'MappedFixationPointY']].itertuples(index=False, name=None)
     coordinates = list(coordinates_pairs) #converts points in dataframe to a list of tuples of coordinates such as (x1, y1), (x2, y2), ...
 
-    psize = 200 #size in pixels of cropped image
+    psize = 100 #size in pixels of cropped image
 
     image = Image.open(stimuli_url)
     img = image.convert('RGBA') #converts to RGBA image to use
