@@ -10,6 +10,7 @@ from bokeh.plotting import figure, output_file, show, save
 from bokeh.palettes import turbo
 from bokeh.embed import components
 from bokeh.resources import CDN, INLINE
+from bokeh.models import FuncTickFormatter, ColumnDataSource, ImageRGBA
 
 UPLOAD_FOLDER = './uploads' #MAKE SURE TO CREATE A FOLDER FOR THIS IN THE CODE FOLDER
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
