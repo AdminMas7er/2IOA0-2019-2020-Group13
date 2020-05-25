@@ -1,16 +1,14 @@
 import os
 import app
-from  flask import Flask,flash,render_template,request,redirect,url_for,send_from_directory
+from  flask import Flask,flash,render_template,request,redirect,url_for,send_from_directory,session
 from werkzeug.utils import secure_filename
 import pandas as pd
 import random
 import numpy as np
 from PIL import Image
-from bokeh.plotting import figure, output_file, show, save
+from bokeh.plotting import figure, output_file, show
 from bokeh.palettes import turbo
 from bokeh.embed import components
-from bokeh.resources import CDN, INLINE
-from bokeh.models import FuncTickFormatter, ColumnDataSource, ImageRGBA
 
 UPLOAD_FOLDER = './uploads' #MAKE SURE TO CREATE A FOLDER FOR THIS IN THE CODE FOLDER
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
@@ -32,7 +30,6 @@ def allowed_file(filename):
 
 @app.route('/',methods=['GET','POST']) #http methods, GET is managing information not secure, POST is Secure
 def initial_upload_file():
-    global stimuli, stimuli_url, data_url
 
     if request.method== 'POST': #if the transfer is Secure
         #checks if the post has the file
@@ -46,18 +43,15 @@ def initial_upload_file():
             return redirect(request.url) 
             
         if file and allowed_file(file.filename):
-                filename=secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
-                data_url = os.path.join(app.config['UPLOAD_FOLDER'],filename)
-                return redirect(url_for('csv_file'))
+                dataset=secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'],dataset))
+                data_url = os.path.join(app.config['UPLOAD_FOLDER'],dataset)
+                return redirect(url_for('csv_file',data_url=data_url))
 
     return render_template("index.html")     
 
-@app.route('/uploads',methods=['GET','POST'])
-def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
-
-    global stimuli, stimuli_url
-
+@app.route('/uploads/<data_url>',methods=['GET','POST'])
+def csv_file(data_url): #file uploaded is a csv file, and image needs to be uploaded
     if request.method== 'POST': #if the transfer is Secure
         #checks if the post has the file
         if 'file' not in request.files:
@@ -70,20 +64,15 @@ def csv_file(): #file uploaded is a csv file, and image needs to be uploaded
             return redirect(request.url)
 
         if file and allowed_file(file.filename):
-            filename=secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
-            stimuli = filename
-            stimuli_url = os.path.join(app.config['UPLOAD_FOLDER'],filename)
-            return redirect(url_for('gazeplot_generate'))    
-
+            stimuli=secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'],stimuli))
+            
+            return redirect(url_for('gazeplot_generate',stimuli=stimuli,data_url=data_url))    
     return render_template("upload_image.html")   
 
-@app.route('/image_generate')
-def gazeplot_generate():
-
-    output_file('image.html', mode='inline')
-
-    global data, data_url, stimuli_url
+@app.route('/image_generate/<data_url>/<stimuli>/')
+def gazeplot_generate(stimuli,data_url):
+    stimuli_url = os.path.join(app.config['UPLOAD_FOLDER'],stimuli)
     data=pd.read_csv(data_url,encoding = "latin1",delim_whitespace=True)
     stimuli_filter=data['StimuliName']==stimuli
     mapped=data[stimuli_filter]
@@ -98,7 +87,7 @@ def gazeplot_generate():
     directory = os.path.dirname(os.path.realpath(__file__))[2:]
     newPath = directory.replace(os.sep, '/') + '/' + stimuli
 
-    plot = figure(plot_width = 900, plot_height=700, x_range=(0,width), y_range=(height,0))
+    plot = figure(plot_width =800 , plot_height=700, x_range=(0,width), y_range=(0,height))
     plot.image_url(url=[newPath], x=0, y=0, h=height, w=width, alpha=1)
 
     j=0
@@ -114,10 +103,7 @@ def gazeplot_generate():
         plot.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.65, color=color)
         plot.circle(points['MappedFixationPointX'], points['MappedFixationPointY'],size=(points['FixationDuration']/25), color=points['color'], alpha=0.85)
 
-    script, div = components(plot, INLINE)
-    show(plot)
-
+    script, div = components(plot,wrap_script=False)
     return render_template('layout.html', plot_script=script, plot_div=div)
-
 if __name__=="__main__":
     app.run(debug=True)
