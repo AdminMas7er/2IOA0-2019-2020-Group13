@@ -3,13 +3,56 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <title>Embed Demo</title>
+    <title>Visualizations</title>
     <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.0.2.min.js"></script>
+    
         <script type="text/javascript">
             Bokeh.set_log_level("info");
         </script>
+        <link
+        type="text/css"
+        rel="stylesheet"
+        href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css"
+      />
+      <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css"
+    />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"></script>
+    <script src="https://unpkg.com/vue@latest/dist/vue.js"></script>
+    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
   </head>
   <body>
-    {{ plot_div|safe }}
+    <div id="tab">
+      <b-card no-body>
+        <b-tabs card>
+            <b-tab no-body title="Gaze plot">
+                {{gaze_div|safe}}
+
+          </b-tab>
+          <b-tab title="Heat Map">
+            <b-card-title>This is where the <code>Heat map in bokeh</code> is supposed to be</b-card-title>
+          </b-tab>
+        </b-tabs>
+          
+      </b-card>
+    </div>
+    <script>
+      {{gaze_script|safe}}
+    </script>
   </body>
+  
+    
+    <script>
+    var app=new Vue( {
+      el:'#tab',
+      props: {
+        plot: Object
+      },
+      ready () {
+        eval(this.plot_script)
+      }
+    })
+    </script>
 </html>
