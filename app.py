@@ -1,17 +1,18 @@
 import os
 import app
-from  flask import Flask, flash,render_template,request,redirect,url_for,request
-from werkzeug.utils import secure_filename
 import pandas as pd
 import random
 import numpy as np
+import time
+
+from  flask import Flask, flash, render_template, request, redirect, url_for, request
+from werkzeug.utils import secure_filename
 from PIL import Image
-from bokeh.plotting import figure, curdoc
+from bokeh.plotting import figure, curdoc, show, output_file
 from bokeh.palettes import turbo
 from bokeh.embed import components
 from bokeh.models import FuncTickFormatter, ColumnDataSource 
 import time 
-
 
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
 
@@ -88,8 +89,10 @@ def graph_generate(stimuli,dataset):
     
     ip_address,stimuli_path,img_url,data_url=data_received(stimuli,dataset)
     data=pd.read_csv(data_url,encoding = "latin1",delim_whitespace=True)
+
     stimuli_filter=data['StimuliName']==stimuli
     mapped=data[stimuli_filter]
+
     user_array=mapped['user'].unique()
 
     
