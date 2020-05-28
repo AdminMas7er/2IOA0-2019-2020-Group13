@@ -70,12 +70,12 @@ def csv_file(dataset): #file uploaded is a csv file, and image needs to be uploa
         if file and allowed_file(file.filename):
             stimuli=secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'],stimuli))
-            return redirect(url_for('gazeplot_generate',stimuli=stimuli,dataset=dataset))    
+            return redirect(url_for('graph_generate',stimuli=stimuli,dataset=dataset))    
 
     return render_template("upload_image.html")   
 
 @app.route('/graph_generate/<dataset>/<stimuli>/')
-def gazeplot_generate(stimuli,dataset):
+def graph_generate(stimuli,dataset):
     ip_address=request.remote_addr
 
     #generating the paths
@@ -89,12 +89,14 @@ def gazeplot_generate(stimuli,dataset):
 
     user_array=mapped['user'].unique()
 
+    img_url='http://'+ip_address+':5000/uploads/'+stimuli+'/' #change the IP between the '//' and :5000
+
+    #start of gazeplot code
+
     palette = turbo(256)
 
     img =  Image.open(stimuli_path)
     width, height = img.size
-
-    img_url='http://'+ip_address+':5000/uploads/'+stimuli+'/' #change the IP between the '//' and :5000
 
     p = figure(plot_width =800 , plot_height=700, x_range=(0,width), y_range=(height,0))
     p.image_url(url=[img_url], x=0, y=0, h=height, w=width, alpha=1)
@@ -115,8 +117,6 @@ def gazeplot_generate(stimuli,dataset):
     script, div = components(p,wrap_script=False)
 
     #start of gaze stripe code
-
-    output_file('image.html', mode="inline")
 
     coordinates_pairs = mapped[['MappedFixationPointX', 'MappedFixationPointY']].itertuples(index=False, name=None)
     coordinates = list(coordinates_pairs) #converts points in dataframe to a list of tuples of coordinates such as (x1, y1), (x2, y2), ...
