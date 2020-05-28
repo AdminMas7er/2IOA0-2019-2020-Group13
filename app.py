@@ -1,6 +1,6 @@
 import os
 import app
-from  flask import Flask, flash,render_template,request,redirect,url_for
+from  flask import Flask, flash,render_template,request,redirect,url_for,request
 from werkzeug.utils import secure_filename
 import pandas as pd
 import random
@@ -13,7 +13,7 @@ from bokeh.embed import components
 
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
 
-app=Flask(__name__)
+app=Flask(__name__,static_folder='uploads')
 app.secret_key = "key"
 #configuring the upload folder and the maximum size
 
@@ -74,10 +74,11 @@ def csv_file(dataset): #file uploaded is a csv file, and image needs to be uploa
 
 @app.route('/graph_generate/<dataset>/<stimuli>/')
 def gazeplot_generate(stimuli,dataset):
+    ip_address=request.remote_addr
     #generating the paths
     data_url = os.path.join(app.config['UPLOAD_FOLDER'],dataset)
     stimuli_path = os.path.join(app.config['UPLOAD_FOLDER'],stimuli)
-
+    stimuli_url=url_for('static',filename=stimuli_path)
     data=pd.read_csv(data_url,encoding = "latin1",delim_whitespace=True)
     stimuli_filter=data['StimuliName']==stimuli
     mapped=data[stimuli_filter]
@@ -85,7 +86,7 @@ def gazeplot_generate(stimuli,dataset):
     palette = turbo(256)
     img =  Image.open(stimuli_path)
     width, height = img.size
-    img_url='http://127.0.0.1:5000/uploads/'+stimuli+'/' #need to change the IP stuff based on your IP
+    img_url='http://'+ip_address+':5000/uploads/'+stimuli+'/' #change the IP between the '//' and :5000
     plot = figure(plot_width =800 , plot_height=700, x_range=(0,width), y_range=(height,0))
     plot.image_url(url=[img_url], x=0, y=0, h=height, w=width, alpha=1)
 
