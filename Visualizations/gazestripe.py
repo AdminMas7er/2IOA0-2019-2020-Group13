@@ -54,7 +54,7 @@ def gazestripe_show():
     plot.yaxis.ticker = list(user_row.values())
     plot.yaxis.formatter = FuncTickFormatter(args=dict(user_coords={v: k for k, v in user_row.items()}), code="return user_coords[tick];") #names each tick according to user
 
-    ds = ColumnDataSource(mapped)
+    ds = ColumnDataSource(mapped) #so that columns used for image, x and y can be recognized
 
     img_size = 1
     plot.image_rgba(image='Image', x='Timestamp', y='UserRow', dw=img_size, dh=img_size, source=ds) #plots each image in gaze stripe
