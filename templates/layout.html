@@ -28,14 +28,14 @@
       <b-card no-body>
         <b-tabs card>
             <b-tab no-body title="Gaze plot">
-                {{gaze_div|safe}}
+                {{div_gazeplot|safe}}
 
           </b-tab>
           <b-tab no-body title="Gaze Stripe">
-            {{stripe_div|safe}}
+            {{div_gazestripe|safe}}
           </b-tab>
           <b-tab title="Heat Map">
-              <b-card-title>This is where the <code>Heat map</code> will be visualized</b-card-title>
+            {{div_heatmap|safe}}
           </b-tab>
           <b-tab title="Eye Clouds">
               <b-card-title>This is where the <code>Eye clouds</code> will be visualized</b-card-title>
@@ -45,10 +45,13 @@
     </div>
 
     <script> 
-      {{gaze_script|safe}}
+      {{script_gazeplot|safe}}
     </script>
      <script>
-      {{stripe_script|safe}}
+      {{script_heatmap|safe}}
+    </script>
+    <script> 
+      {{script_gazestripe|safe}}
     </script>
   </body>
   
