@@ -4,6 +4,9 @@ import pandas as pd
 import random
 import numpy as np
 import time
+import cv2
+import scipy.ndimage.filters as filters
+import matplotlib.pyplot as plt
 
 from  flask import Flask, flash, render_template, request, redirect, url_for, request
 from werkzeug.utils import secure_filename
@@ -12,7 +15,6 @@ from bokeh.plotting import figure, curdoc, show, output_file
 from bokeh.palettes import turbo
 from bokeh.embed import components
 from bokeh.models import FuncTickFormatter, ColumnDataSource 
-import time 
 
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
 
@@ -101,8 +103,8 @@ def graph_generate(stimuli,dataset):
     img =  Image.open(stimuli_path)
     width, height = img.size
 
-    p = figure(plot_width =800 , plot_height=700, x_range=(0,width), y_range=(height,0))
-    p.image_url(url=[img_url], x=0, y=0, h=height, w=width, alpha=1)
+    plot_gazeplot = figure(plot_width =800 , plot_height=700, x_range=(0,width), y_range=(height,0))
+    plot_gazeplot.image_url(url=[img_url], x=0, y=0, h=height, w=width, alpha=1)
 
     j=0
     specific_color = []
@@ -114,10 +116,52 @@ def graph_generate(stimuli,dataset):
         index = (np.where(user_array==user))[0][0]
         color = '#' + str(specific_color[index][1:])
         points=mapped[mapped['user']==user].sort_values(by='Timestamp')
-        p.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.65, color=color)
-        p.circle(points['MappedFixationPointX'], points['MappedFixationPointY'],size=(points['FixationDuration']/25), color=points['color'], alpha=0.85)
+        plot_gazeplot.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.65, color=color)
+        plot_gazeplot.circle(points['MappedFixationPointX'], points['MappedFixationPointY'],size=(points['FixationDuration']/25), color=points['color'], alpha=0.85)
 
-    script, div = components(p,wrap_script=False)
+    script_gazeplot, div_gazeplot = components(plot_gazeplot,wrap_script=False)
+
+    #start of heatmap code
+
+    ds = data[data['StimuliName'] == stimuli].reset_index().copy()
+    io = plt.imread(stimuli_path)
+    i = io.copy().astype(np.uint8)  #cast numpy array to specific type: Unsigned integer (0 to 255)
+
+    if i.ndim == 2: #number of dimensions of array
+        i = cv2.cvtColor(i, cv2.COLOR_GRAY2RGBA) #color gray
+    else:
+        if i.ndim == 3:
+            i = cv2.cvtColor(i, cv2.COLOR_RGB2RGBA) #color from RGB
+
+    i = np.flipud(i) ##flips array in the up/down direction
+
+    #check is the point is inside the bounds
+    bounds = (ds['MappedFixationPointX']>width) | (ds['MappedFixationPointY']>height) \
+             | (ds['MappedFixationPointX']<0) | (ds['MappedFixationPointY']<0)
+
+    ds = ds[np.logical_not(bounds)].reset_index().copy()
+
+    #create numpy arrays for fixation point x, fixation point y and fixation duration
+    point_x = np.array([])
+    point_y = np.array([])
+    duration = np.array([])
+
+    for index, row in ds.iterrows():
+        point_x = np.append(point_x, np.array([row['MappedFixationPointX']]))
+        point_y = np.append(point_y, np.array([row['MappedFixationPointY']]))
+        duration = np.append(duration, np.array([row['FixationDuration']]))
+
+    #create histogram H using numpy histogram 2d
+    H, x_edges, y_edges = np.histogram2d(point_y, point_x, bins=200, weights=duration)
+    H = filters.gaussian_filter(H, sigma=4)  #gaussian filter
+    H = np.flipud(H)  #flips array in the up/down direction
+
+    #map the heatmap
+    plot_heatmap = figure(plot_width=900, plot_height=700, x_range=(0, width), y_range=(height, 0))
+    plot_heatmap.image_url(url=[img_url], x=0, y=0, h=height, w=width, alpha=1)
+    plot_heatmap.image(image=[H], x=0, y=height, dw=width, dh=height, palette="Turbo11", global_alpha=0.5)
+
+    script_heatmap, div_heatmap = components(plot_heatmap, wrap_script=False)
 
     #start of gaze stripe code
 
@@ -143,25 +187,23 @@ def graph_generate(stimuli,dataset):
     user_row = dict(zip(user_array, range(user_array.shape[0]))) #stores row of each user where output should be printed, eg. - p1:0 -> output of user p1 is stored in row 0(row 1)
     mapped['UserRow'] = mapped['user'].replace(user_row)
 
-    plot = figure(plot_width = 1500, plot_height=700, match_aspect=True)
+    plot_gazestripe = figure(plot_width = 1500, plot_height=700, match_aspect=True)
 
-    plot.xaxis.visible = False
-    plot.xgrid.visible = False
-    plot.ygrid.visible = False
+    plot_gazestripe.xaxis.visible = False
+    plot_gazestripe.xgrid.visible = False
+    plot_gazestripe.ygrid.visible = False
 
-    plot.yaxis.ticker = list(user_row.values())
-    plot.yaxis.formatter = FuncTickFormatter(args=dict(user_coords={v: k for k, v in user_row.items()}), code="return user_coords[tick];") #names each tick according to user
+    plot_gazestripe.yaxis.ticker = list(user_row.values())
+    plot_gazestripe.yaxis.formatter = FuncTickFormatter(args=dict(user_coords={v: k for k, v in user_row.items()}), code="return user_coords[tick];") #names each tick according to user
 
-    ds = ColumnDataSource(mapped) #so that columns used for image, x and y can be recognized
+    source = ColumnDataSource(mapped) #so that columns used for image, x and y can be recognized
 
     img_size = 1
-    plot.image_rgba(image='Image', x='Timestamp', y='UserRow', dw=img_size, dh=img_size, source=ds) #plots each image in gaze stripe
+    plot_gazestripe.image_rgba(image='Image', x='Timestamp', y='UserRow', dw=img_size, dh=img_size, source=source) #plots each image in gaze stripe
 
-    script1, div1 = components(plot,wrap_script=False)
+    script_gazestripe, div_gazestripe = components(plot_gazestripe,wrap_script=False)
 
-    return render_template('layout.html',stripe_script=script1,stripe_div=div1, gaze_script=script,gaze_div=div)
-
-
+    return render_template('layout.html',script_gazeplot=script_gazeplot,div_gazeplot=div_gazeplot, script_gazestripe=script_gazestripe,div_gazestripe=div_gazestripe, script_heatmap=script_heatmap,div_heatmap=div_heatmap)
 
 if __name__=="__main__":
     app.run(debug=True)
