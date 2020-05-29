@@ -11,7 +11,8 @@ from PIL import Image
 from bokeh.plotting import figure, curdoc, show, output_file
 from bokeh.palettes import turbo
 from bokeh.embed import components
-from bokeh.models import FuncTickFormatter, ColumnDataSource
+from bokeh.models import FuncTickFormatter, ColumnDataSource 
+import time 
 
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
 
@@ -70,18 +71,23 @@ def csv_file(dataset): #file uploaded is a csv file, and image needs to be uploa
         if file and allowed_file(file.filename):
             stimuli=secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'],stimuli))
+            
             return redirect(url_for('graph_generate',stimuli=stimuli,dataset=dataset))    
-
     return render_template("upload_image.html")   
+
+def data_received(stimuli,dataset):
+    ip_address=request.remote_addr
+    data_url = os.path.join(app.config['UPLOAD_FOLDER'],dataset)
+    stimuli_path = os.path.join(app.config['UPLOAD_FOLDER'],stimuli)
+    
+    img_url='http://'+ip_address+':5000/uploads/'+stimuli+'/'
+  
+    return (ip_address,stimuli_path,img_url,data_url)
 
 @app.route('/graph_generate/<dataset>/<stimuli>/')
 def graph_generate(stimuli,dataset):
-    ip_address=request.remote_addr
-
-    #generating the paths
-    data_url = os.path.join(app.config['UPLOAD_FOLDER'],dataset)
-    stimuli_path = os.path.join(app.config['UPLOAD_FOLDER'],stimuli)
-
+    
+    ip_address,stimuli_path,img_url,data_url=data_received(stimuli,dataset)
     data=pd.read_csv(data_url,encoding = "latin1",delim_whitespace=True)
 
     stimuli_filter=data['StimuliName']==stimuli
@@ -89,10 +95,7 @@ def graph_generate(stimuli,dataset):
 
     user_array=mapped['user'].unique()
 
-    img_url='http://'+ip_address+':5000/uploads/'+stimuli+'/' #change the IP between the '//' and :5000
-
-    #start of gazeplot code
-
+    #start of gaze plot code
     palette = turbo(256)
 
     img =  Image.open(stimuli_path)
@@ -156,7 +159,9 @@ def graph_generate(stimuli,dataset):
 
     script1, div1 = components(plot,wrap_script=False)
 
-    return render_template('layout.html',gazestripe_script=script1,gazestripe_div=div1, gaze_script=script,gaze_div=div)
+    return render_template('layout.html',stripe_script=script1,stripe_div=div1, gaze_script=script,gaze_div=div)
+
+
 
 if __name__=="__main__":
     app.run(debug=True)

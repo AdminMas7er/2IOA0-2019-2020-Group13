@@ -30,16 +30,16 @@
             <b-tab no-body title="Gaze plot">
                 {{gaze_div|safe}}
 
+          </b-tab>
+          <b-tab no-body title="Gaze Stripe">
+            {{stripe_div|safe}}
+          </b-tab>
+          <b-tab title="Heat Map">
+              <b-card-title>This is where the <code>Heat map</code> will be visualized</b-card-title>
+          </b-tab>
+          <b-tab title="Eye Clouds">
+              <b-card-title>This is where the <code>Eye clouds</code> will be visualized</b-card-title>
             </b-tab>
-
-            <b-tab title="Heat Map">
-              <b-card-title>This is where the <code>Heat map in bokeh</code> is supposed to be</b-card-title>
-            </b-tab>
-
-            <b-tab no-body title="Gaze stripe">
-              {{gazestripe_div|safe}}
-
-            </b-tab> 
         </b-tabs>
       </b-card>
     </div>
@@ -47,11 +47,9 @@
     <script> 
       {{gaze_script|safe}}
     </script>
-
-    <script>
-      {{gazestripe_script|safe}}
+     <script>
+      {{stripe_script|safe}}
     </script>
-
   </body>
   
     
