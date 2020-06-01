@@ -4,7 +4,7 @@ import pandas as pd
 import random
 import numpy as np
 import time
-import cv2
+import cv2 as cv2
 import scipy.ndimage.filters as filters
 import matplotlib.pyplot as plt
 
