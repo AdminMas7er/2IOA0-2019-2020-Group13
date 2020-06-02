@@ -103,7 +103,17 @@ def graph_generate(stimuli,dataset):
     img =  Image.open(stimuli_path)
     width, height = img.size
 
-    plot_gazeplot = figure(plot_width =800 , plot_height=700, x_range=(0,width), y_range=(height,0))
+    x = mapped['MappedFixationPointX']
+    y = mapped['MappedFixationPointY']
+
+    source = ColumnDataSource(data=dict(x=x, y=y))
+
+    TOOLTIPS = [
+        ("Point x", "@x"),
+        ("Point y", "@y")
+    ]
+
+    plot_gazeplot = figure(plot_width =800 , plot_height=700, x_range=(0,width), y_range=(height,0), tooltips=TOOLTIPS)
     plot_gazeplot.image_url(url=[img_url], x=0, y=0, h=height, w=width, alpha=1)
 
     j=0
