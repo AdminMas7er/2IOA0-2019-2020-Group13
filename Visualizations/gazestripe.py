@@ -9,10 +9,10 @@ from bokeh.plotting import figure, show, output_file
 
 #start = time.process_time()
 
-data = pd.read_csv("/Users/20190864/OneDrive - TU Eindhoven/Yemoe/TUe/Year 1/Quartile 4/DBL + Webtech/MetroMapsEyeTracking/all_fixation_data_cleaned_up.csv", encoding='latin1', delim_whitespace = True)
+data = pd.read_csv("C:/Users/20190825/Desktop/TUE NOTES/2IOA0/MetroMapsEyeTracking/MetroMapsEyeTracking/all_fixation_data_cleaned_up.csv", encoding='latin1', delim_whitespace = True)
 
 stimuli = '01_Antwerpen_S1.jpg'
-stimuli_url = '/Users/20190864/OneDrive - TU Eindhoven/Yemoe/TUe/Year 1/Quartile 4/DBL + Webtech/MetroMapsEyeTracking/stimuli/01_Antwerpen_S1.jpg'
+stimuli_url = 'C:/Users/20190825/Desktop/TUE NOTES/2IOA0/MetroMapsEyeTracking/MetroMapsEyeTracking/stimuli/01_Antwerpen_S1.jpg'
 
 stimuli_filter=data['StimuliName']==stimuli
 mapped=data[stimuli_filter]
