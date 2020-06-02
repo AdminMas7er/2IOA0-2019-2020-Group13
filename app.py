@@ -113,7 +113,7 @@ def graph_generate(stimuli,dataset):
         ("Point y", "@y")
     ]
 
-    plot_gazeplot = figure(plot_width =800 , plot_height=700, x_range=(0,width), y_range=(height,0), tooltips=TOOLTIPS)
+    plot_gazeplot = figure(plot_width =800 , plot_height=700, x_range=(0,width), y_range=(height,0), tooltips=TOOLTIPS, title='Click items on the legend to hide the respective paths')
     plot_gazeplot.image_url(url=[img_url], x=0, y=0, h=height, w=width, alpha=1)
 
     j=0

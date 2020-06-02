@@ -7,12 +7,10 @@ from bokeh.plotting import figure, output_file, show, ColumnDataSource
 
 output_file("image.html", mode='inline')
 
-data = pd.read_csv(
-    r"C:/Users/20191071/Desktop/MetroMapsEyeTracking/MetroMapsEyeTracking/all_fixation_data_cleaned_up.csv",
-    encoding="latin1", delim_whitespace=True)
+data = pd.read_csv("/Users/20190864/OneDrive - TU Eindhoven/Yemoe/TUe/Year 1/Quartile 4/DBL + Webtech/MetroMapsEyeTracking/all_fixation_data_cleaned_up.csv", encoding='latin1', delim_whitespace = True)
 
-stimuli = '18_Ljubljana_S1.jpg'
-stimuli_url = '/Users/20191071/Desktop/MetroMapsEyeTracking/MetroMapsEyeTracking/stimuli/01_Antwerpen_S1.jpg'
+stimuli = '01_Antwerpen_S1.jpg'
+stimuli_url = '/Users/20190864/OneDrive - TU Eindhoven/Yemoe/TUe/Year 1/Quartile 4/DBL + Webtech/MetroMapsEyeTracking/stimuli/01_Antwerpen_S1.jpg'
 
 stimuli_filter = data['StimuliName'] == stimuli
 mapped = data[stimuli_filter]
@@ -34,7 +32,7 @@ TOOLTIPS = [
     ("Point y", "@y")
 ]
 
-plot = figure(plot_width=900, plot_height=700, x_range=(0, width), y_range=(height, 0), tooltips=TOOLTIPS)
+plot = figure(plot_width=900, plot_height=700, x_range=(0, width), y_range=(height, 0), tooltips=TOOLTIPS, title='Click items on the legend to hide the respective paths')
 
 plot.image_url(url=[stimuli_url], x=0, y=0, h=height, w=width, alpha=1)
 
