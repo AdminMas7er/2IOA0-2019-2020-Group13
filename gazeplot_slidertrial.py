@@ -5,8 +5,7 @@ import random
 from PIL import Image
 from bokeh.palettes import turbo
 from bokeh.layouts import column, row
-from bokeh.models import CustomJS, Slider
-from bokeh.plotting import ColumnDataSource, figure, output_file, show
+from bokeh.plotting import figure, output_file, show
 
 output_file("image.html", mode='inline')
 
@@ -41,35 +40,11 @@ for user in user_array:
 
     points=mapped[mapped['user']==user]
 
-    x = points['MappedFixationPointX']
-    y = points['MappedFixationPointY']
-    alpha=[]
-    for item in x:
-        alpha.append(0.5) #initial thickness of dots
-    
-    source = ColumnDataSource(data=dict(x=x, y=y, alpha=alpha, size=(points['FixationDuration']/25), color=points['color']))
-
-    callback = CustomJS(args=dict(source=source), code="""
-    const data = source.data;
-    const f = cb_obj.value
-    var x = data['x']
-    var y = data['y']
-    var size = data['size']
-    var color = data['color']
-    const alpha = data['alpha']
-    for (var i = 0; i < x.length; i++) {
-            alpha[i] = f
-      }
-    source.change.emit();
-    """)
-    plot.circle(x='x', y='y',size='size', color='color', alpha='alpha', line_alpha=0, source=source)
-    slider = Slider(start=0, end=1, value=0.5, step=.05, title="Alpha")
-    slider.js_on_change('value', callback)
-
-    plot.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.8, color=color)
+    plot.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.65, color=color, legend_label=user)
+    plot.circle(points['MappedFixationPointX'], points['MappedFixationPointY'],size=(points['FixationDuration']/25), color=points['color'], alpha=0.85, legend_label=user)
     #points.loc[(points['user'] == user), 'Timestamp'] = np.arange((points['user'] == user).sum())
-    #plot.text(points['MappedFixationPointX'], points['MappedFixationPointY'], text=points['Timestamp'], color="black", text_font_size="5pt")
+    #plot.text(points['MappedFixationPointX'], points['MappedFixationPointY'], text=points['Timestamp'], color="black", text_font_size="5pt", legend_label=user)
 
-layout = column(slider, plot)
+plot.legend.click_policy="hide"
 
-show(layout)
+show(plot)
