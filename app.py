@@ -4,7 +4,7 @@ import pandas as pd
 import random
 import numpy as np
 import time
-import cv2 as cv2
+import cv2
 import scipy.ndimage.filters as filters
 import matplotlib.pyplot as plt
 
@@ -14,7 +14,7 @@ from PIL import Image
 from bokeh.plotting import figure, curdoc, show, output_file
 from bokeh.palettes import turbo
 from bokeh.embed import components
-from bokeh.models import FuncTickFormatter, ColumnDataSource 
+from bokeh.models import FuncTickFormatter, ColumnDataSource, HoverTool
 
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
 
@@ -116,10 +116,12 @@ def graph_generate(stimuli,dataset):
         index = (np.where(user_array==user))[0][0]
         color = '#' + str(specific_color[index][1:])
         points=mapped[mapped['user']==user].sort_values(by='Timestamp')
-        plot_gazeplot.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.65, color=color)
-        plot_gazeplot.circle(points['MappedFixationPointX'], points['MappedFixationPointY'],size=(points['FixationDuration']/25), color=points['color'], alpha=0.85)
+        plot_gazeplot.line(points['MappedFixationPointX'], points['MappedFixationPointY'], line_width=2, alpha=0.85, color=color, legend_label=user)
+        plot_gazeplot.circle(points['MappedFixationPointX'], points['MappedFixationPointY'],size=(points['FixationDuration']/25), color=points['color'], alpha=0.85, legend_label=user)
+    
+    plot_gazeplot.legend.click_policy="hide" #makes legend interactive so that when item on legend is clicked the item is hidden (can be clicked again to show)
 
-    script_gazeplot, div_gazeplot = components(plot_gazeplot,wrap_script=False)
+    script_gazeplot, div_gazeplot = components(plot_gazeplot, wrap_script=False)
 
     #start of heatmap code
 
@@ -181,10 +183,14 @@ def graph_generate(stimuli,dataset):
 
     mapped['Image'] = cropped_images
 
+    userlist=[]
+
     for user in user_array:
         mapped.loc[(mapped['user'] == user), 'Timestamp'] = np.arange((mapped['user'] == user).sum())
-
-    user_row = dict(zip(user_array, range(user_array.shape[0]))) #stores row of each user where output should be printed, eg. - p1:0 -> output of user p1 is stored in row 0(row 1)
+        userlist.append(int(user[1:]))
+    
+    user_row = dict(zip(user_array, userlist)) #stores row of each user where output should be printed according to user index, eg. - p1:1, p23:23 -> output of user p1, p23 is stored in row 1, 23 respectively
+    
     mapped['UserRow'] = mapped['user'].replace(user_row)
 
     plot_gazestripe = figure(plot_width = 1500, plot_height=700, match_aspect=True)
@@ -200,10 +206,13 @@ def graph_generate(stimuli,dataset):
 
     img_size = 1
     plot_gazestripe.image_rgba(image='Image', x='Timestamp', y='UserRow', dw=img_size, dh=img_size, source=source) #plots each image in gaze stripe
+    
+    tools = "pan, wheel_zoom, box_zoom, reset, save, hover"
+    plot_gazestripe.add_tools(HoverTool(tooltips=[('user, path index', '@UserRow, @Timestamp')])) #adds hover tool to view user and path index
 
-    script_gazestripe, div_gazestripe = components(plot_gazestripe,wrap_script=False)
+    script_gazestripe, div_gazestripe = components(plot_gazestripe, wrap_script=False)
 
-    return render_template('layout.html',script_gazeplot=script_gazeplot,div_gazeplot=div_gazeplot, script_gazestripe=script_gazestripe,div_gazestripe=div_gazestripe, script_heatmap=script_heatmap,div_heatmap=div_heatmap)
+    return render_template('layout.html',script_gazeplot=script_gazeplot, div_gazeplot=div_gazeplot, script_gazestripe=script_gazestripe, div_gazestripe=div_gazestripe, script_heatmap=script_heatmap, div_heatmap=div_heatmap)
 
 if __name__=="__main__":
     app.run(debug=True)
