@@ -65,7 +65,8 @@ def gazestripe_show():
 
     tools = "pan, wheel_zoom, box_zoom, reset, save, hover"
 
-    plot.add_tools(HoverTool(tooltips=[('user, path index', '@UserRow, @Timestamp')]))
+    plot.add_tools(HoverTool(tooltips=[('User', '@UserRow'),
+                                        ('Path Index', '@Timestamp')]))
 
     show(plot)
 

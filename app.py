@@ -208,7 +208,8 @@ def graph_generate(stimuli,dataset):
     plot_gazestripe.image_rgba(image='Image', x='Timestamp', y='UserRow', dw=img_size, dh=img_size, source=source) #plots each image in gaze stripe
     
     tools = "pan, wheel_zoom, box_zoom, reset, save, hover"
-    plot_gazestripe.add_tools(HoverTool(tooltips=[('user, path index', '@UserRow, @Timestamp')])) #adds hover tool to view user and path index
+    plot_gazestripe.add_tools(HoverTool(tooltips=[('User', '@UserRow'),
+                                        ('Path Index', '@Timestamp')])) #adds hover tool to view user and path index
 
     script_gazestripe, div_gazestripe = components(plot_gazestripe, wrap_script=False)
 
