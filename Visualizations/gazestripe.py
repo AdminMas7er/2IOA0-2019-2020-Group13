@@ -4,7 +4,7 @@ import time
 from PIL import Image
 
 from bokeh.io import show
-from bokeh.models import FuncTickFormatter, ColumnDataSource
+from bokeh.models import FuncTickFormatter, ColumnDataSource, HoverTool
 from bokeh.plotting import figure, show, output_file
 
 #start = time.process_time()
@@ -39,10 +39,14 @@ def gazestripe_show():
 
     mapped['Image'] = cropped_images
 
+    userlist=[]
+
     for user in user_array:
         mapped.loc[(mapped['user'] == user), 'Timestamp'] = np.arange((mapped['user'] == user).sum())
-
-    user_row = dict(zip(user_array, range(user_array.shape[0]))) #stores row of each user where output should be printed, eg. - p1:0 -> output of user p1 is stored in row 0(row 1)
+        userlist.append(int(user[1:]))
+    
+    user_row = dict(zip(user_array, userlist)) #stores row of each user where output should be printed according to user index, eg. - p1:1, p23:23 -> output of user p1, p23 is stored in row 1, 23 respectively
+    
     mapped['UserRow'] = mapped['user'].replace(user_row)
 
     plot = figure(plot_width = 1500, plot_height=700, match_aspect=True)
@@ -58,6 +62,10 @@ def gazestripe_show():
 
     img_size = 1
     plot.image_rgba(image='Image', x='Timestamp', y='UserRow', dw=img_size, dh=img_size, source=ds) #plots each image in gaze stripe
+
+    tools = "pan, wheel_zoom, box_zoom, reset, save, hover"
+
+    plot.add_tools(HoverTool(tooltips=[('user, path index', '@UserRow, @Timestamp')]))
 
     show(plot)
 
