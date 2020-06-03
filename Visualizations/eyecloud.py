@@ -18,33 +18,34 @@ stimuli_url = 'C:/Users/20190825/Desktop/TUE NOTES/2IOA0/MetroMapsEyeTracking/Me
 stimuli_filter=data['StimuliName']==stimuli
 mapped=data[stimuli_filter]
 
-img_rgba =  Image.open(stimuli_url)
+img =  Image.open(stimuli_url)
+img_rgb = img.convert('RGB') #converting the image in RGB values
+h,w=img.size
+npImg=np.array(img_rgb) #getting the RGB values in an array
 
+Cluster_map=mapped[['MappedFixationPointX','MappedFixationPointY','FixationDuration']].copy() #creating a separate dataframe for the clustering
 
-Cluster_map=mapped[['MappedFixationPointX','MappedFixationPointY','FixationDuration']].copy()
-
-km=KMeans(n_clusters=3)
+km=KMeans(n_clusters=3) #number of clusters
 km.fit(Cluster_map)
-centers=pd.DataFrame(km.cluster_centers_,columns=Cluster_map.columns)
-centers_coords=centers[['MappedFixationPointX','MappedFixationPointY','FixationDuration']].itertuples(index=False,name=None)
-centre_pairs=list(centers_coords)
+centers=pd.DataFrame(km.cluster_centers_,columns=Cluster_map.columns) #generating the centre of each cluster
+centers_coords=centers[['MappedFixationPointX','MappedFixationPointY','FixationDuration']].itertuples(index=False,name=None)  #putting the x, y, size values of each centre in a tuple
+centre_pairs=list(centers_coords) #getting those tuples in a list
 
 cropped_thumbs=[]
 
-for x,y,size in centre_pairs:
-    box=((x-size/2,y-size/2,x+size/2,y+size/2))
-    im_a=Image.new("L",img_rgba.size,0)
-    draw=ImageDraw.Draw(im_a)
-    draw.ellipse(box)
-    im_rgba=img_rgba.copy()
-    im_rgba.putalpha(im_a)
-    im_rgba_crop=im_rgba.crop(box)
-    cropped_thumbs.append(np.array(im_rgba_crop).view(np.uint32)[::-1])
+for x,y,size in centre_pairs: #the problem lies HERE
+    box=[0,0,size,size] #size of crop, some issues with this
+    alpha=Image.new('L',img.size,0)
+    draw=ImageDraw.Draw(alpha)
+    draw.pieslice(box,,360,fill=255) #another method for the elipse
+    npAlpha=np.array(alpha)
+    npImg=np.dstack((npImg,npAlpha)) #stacking the alpha with RGB
+    cropped_thumbs.append(np.array(npImg).view(np.uint32)[::-1]) #this doesn't work, need to put them in an array
 centers['thumbnails']=cropped_thumbs
 ds=ColumnDataSource(centers)
 img_size=1
 plot_gazeplot = figure(plot_width =1000 , plot_height=700, match_aspect=True)
-plot_gazeplot.image_rgba(image='thumbnails', x='MappedFixationPointX', y='MappedFixationPointY', dw=img_size, dh=img_size, source=ds)
+plot_gazeplot.image_rgba(image='thumbnails', x='MappedFixationPointX', y='MappedFixationPointY', dw=img_size, dh=img_size, source=ds) #trying to draw the points
 
 
 
