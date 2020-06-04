@@ -43,17 +43,18 @@ for x,y,size in centre_pairs: #generating the cricle crop by creating a separate
 centers['thumbnails']=cropped_thumbs
 
 centers['FixationDuration']=centers['FixationDuration']/6.25
+print(centers)
 ds=ColumnDataSource(centers)
-plot_gazeplot = figure(plot_width =1000 , plot_height=700, match_aspect=True)
-plot_gazeplot.xgrid.visible = False
-plot_gazeplot.ygrid.visible = False
-plot_gazestripe.xaxis.visible = False
-plot_gazestripe.xaxis.visible = False
-plot_gazeplot.image_rgba(image='thumbnails', x='MappedFixationPointX', y='MappedFixationPointY', dw='FixationDuration', dh='FixationDuration', source=ds) #trying to draw the points
+plot_eyeclouds = figure(plot_width =1000 , plot_height=700, match_aspect=True)
+plot_eyeclouds.xgrid.visible = False
+plot_eyeclouds.ygrid.visible = False
+plot_eyeclouds.xaxis.visible = False
+plot_eyeclouds.xaxis.visible = False
+plot_eyeclouds.image_rgba(image='thumbnails', x='MappedFixationPointX', y='MappedFixationPointY', dw='FixationDuration', dh='FixationDuration', source=ds) #trying to draw the points
 
 
 
 
 
 
-show(plot_gazeplot)
+show(plot_eyeclouds)

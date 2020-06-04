@@ -247,7 +247,7 @@ def graph_generate(stimuli,dataset):
         cropped_thumbs.append(np.array(img_cropped).view(np.uint32)[::-1]) #putting all the values in an array
     
     centers['thumbnails']=cropped_thumbs
-    centers['FixationDuration']=centers['FixationDuration']/5 #resizing for a more realistic approach
+    centers['FixationDuration']=centers['FixationDuration']/5 #resizing for a better look
     ds=ColumnDataSource(centers)
 
     plot_eyeclouds = figure(plot_width =1000 , plot_height=700, match_aspect=True)
