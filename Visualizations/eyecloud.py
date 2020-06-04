@@ -18,7 +18,7 @@ stimuli_url = 'C:/Users/20190825/Desktop/TUE NOTES/2IOA0/MetroMapsEyeTracking/Me
 stimuli_filter=data['StimuliName']==stimuli
 mapped=data[stimuli_filter]
 
-img =  Image.open(stimuli_url)
+img =  Image.open(stimuli_url) 
 img_rgb = img.convert('RGB') #converting the image in RGB values
 
 Cluster_map=mapped[['MappedFixationPointX','MappedFixationPointY','FixationDuration']].copy() #creating a separate dataframe for the clustering
@@ -42,8 +42,7 @@ for x,y,size in centre_pairs: #generating the cricle crop by creating a separate
     cropped_thumbs.append(np.array(img_cropped).view(np.uint32)[::-1]) 
 centers['thumbnails']=cropped_thumbs
 
-centers['FixationDuration']=centers['FixationDuration']/6.25
-print(centers)
+centers['FixationDuration']=centers['FixationDuration']/6.25 #resizing each image
 ds=ColumnDataSource(centers)
 plot_eyeclouds = figure(plot_width =1000 , plot_height=700, match_aspect=True)
 plot_eyeclouds.xgrid.visible = False
