@@ -12,44 +12,48 @@ output_file("image.html", mode='inline')
 
 data = pd.read_csv('C:/Users/20190825/Desktop/TUE NOTES/2IOA0/MetroMapsEyeTracking/MetroMapsEyeTracking/all_fixation_data_cleaned_up.csv', encoding='latin1', delim_whitespace = True)
 
-stimuli = '01_Antwerpen_S1.jpg'
-stimuli_url = 'C:/Users/20190825/Desktop/TUE NOTES/2IOA0/MetroMapsEyeTracking/MetroMapsEyeTracking/stimuli/01_Antwerpen_S1.jpg'
+stimuli = '10_Barcelona_S1.jpg'
+stimuli_url = 'C:/Users/20190825/Desktop/TUE NOTES/2IOA0/MetroMapsEyeTracking/MetroMapsEyeTracking/stimuli/10_Barcelona_S1.jpg'
 
 stimuli_filter=data['StimuliName']==stimuli
 mapped=data[stimuli_filter]
 
-img_rgba =  Image.open(stimuli_url)
+img =  Image.open(stimuli_url) 
+img_rgb = img.convert('RGB') #converting the image in RGB values
 
+Cluster_map=mapped[['MappedFixationPointX','MappedFixationPointY','FixationDuration']].copy() #creating a separate dataframe for the clustering
 
-Cluster_map=mapped[['MappedFixationPointX','MappedFixationPointY','FixationDuration']].copy()
-
-km=KMeans(n_clusters=3)
+km=KMeans(n_clusters=6) #number of clusters
 km.fit(Cluster_map)
-centers=pd.DataFrame(km.cluster_centers_,columns=Cluster_map.columns)
-centers_coords=centers[['MappedFixationPointX','MappedFixationPointY','FixationDuration']].itertuples(index=False,name=None)
-centre_pairs=list(centers_coords)
+centers=pd.DataFrame(km.cluster_centers_,columns=Cluster_map.columns) #generating the centre of each cluster
+centers_coords=centers[['MappedFixationPointX','MappedFixationPointY','FixationDuration']].itertuples(index=False,name=None)  #putting the x, y, size values of each centre in a tuple
+centre_pairs=list(centers_coords) #getting those tuples in a list
 
 cropped_thumbs=[]
+i=0
+for x,y,size in centre_pairs: #generating the cricle crop by creating a separate black background with awhite circle which is the alpha channel and superimposing the RGB channel
+    img_cropped=img_rgb.crop((x,y,x+size/2,y+size/2)) 
+    alpha =Image.new('L',img_cropped.size)
+    alpha_draw=ImageDraw.Draw(alpha)
+    wc,hc=img_cropped.size
+    alpha_draw.ellipse((0,0,wc,hc),fill=255)
+    img_cropped.putalpha(alpha)
 
-for x,y,size in centre_pairs:
-    box=((x-size/2,y-size/2,x+size/2,y+size/2))
-    im_a=Image.new("L",img_rgba.size,0)
-    draw=ImageDraw.Draw(im_a)
-    draw.ellipse(box)
-    im_rgba=img_rgba.copy()
-    im_rgba.putalpha(im_a)
-    im_rgba_crop=im_rgba.crop(box)
-    cropped_thumbs.append(np.array(im_rgba_crop).view(np.uint32)[::-1])
+    cropped_thumbs.append(np.array(img_cropped).view(np.uint32)[::-1]) 
 centers['thumbnails']=cropped_thumbs
+
+centers['FixationDuration']=centers['FixationDuration']/6.25 #resizing each image
 ds=ColumnDataSource(centers)
-img_size=1
-plot_gazeplot = figure(plot_width =1000 , plot_height=700, match_aspect=True)
-plot_gazeplot.image_rgba(image='thumbnails', x='MappedFixationPointX', y='MappedFixationPointY', dw=img_size, dh=img_size, source=ds)
+plot_eyeclouds = figure(plot_width =1000 , plot_height=700, match_aspect=True)
+plot_eyeclouds.xgrid.visible = False
+plot_eyeclouds.ygrid.visible = False
+plot_eyeclouds.xaxis.visible = False
+plot_eyeclouds.xaxis.visible = False
+plot_eyeclouds.image_rgba(image='thumbnails', x='MappedFixationPointX', y='MappedFixationPointY', dw='FixationDuration', dh='FixationDuration', source=ds) #trying to draw the points
 
 
 
-plot_gazeplot.xgrid.visible = False
-plot_gazeplot.ygrid.visible = False
 
 
-show(plot_gazeplot)
+
+show(plot_eyeclouds)

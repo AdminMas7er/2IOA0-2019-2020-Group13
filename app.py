@@ -7,11 +7,11 @@ import time
 import cv2
 import scipy.ndimage.filters as filters
 import matplotlib.pyplot as plt
-
+from sklearn.cluster import KMeans
 from  flask import Flask, flash, render_template, request, redirect, url_for, request
 from werkzeug.utils import secure_filename
-from PIL import Image
-from bokeh.plotting import figure, curdoc, show, output_file
+from PIL import Image,ImageDraw
+from bokeh.plotting import figure
 from bokeh.palettes import turbo
 from bokeh.embed import components
 from bokeh.models import FuncTickFormatter, ColumnDataSource, HoverTool
@@ -220,10 +220,46 @@ def graph_generate(stimuli,dataset):
     tools = "pan, wheel_zoom, box_zoom, reset, save, hover"
     plot_gazestripe.add_tools(HoverTool(tooltips=[('User', '@UserRow'),
                                         ('Path Index', '@Timestamp')])) #adds hover tool to view user and path index
-
     script_gazestripe, div_gazestripe = components(plot_gazestripe, wrap_script=False)
 
-    return render_template('layout.html',script_gazeplot=script_gazeplot, div_gazeplot=div_gazeplot, script_gazestripe=script_gazestripe, div_gazestripe=div_gazestripe, script_heatmap=script_heatmap, div_heatmap=div_heatmap)
+    #start of eye clouds code
+
+    img =  Image.open(stimuli_path)
+    img_rgb = img.convert('RGB') #converting the image in RGB values
+
+    Cluster_map=mapped[['MappedFixationPointX','MappedFixationPointY','FixationDuration']].copy() #creating a separate dataframe for the clustering
+
+    km=KMeans(n_clusters=6) #number of clusters
+    km.fit(Cluster_map) #fitting the cluster on each one
+    centers=pd.DataFrame(km.cluster_centers_,columns=Cluster_map.columns) #generating the centre of each cluster
+    centers_coords=centers[['MappedFixationPointX','MappedFixationPointY','FixationDuration']].itertuples(index=False,name=None)  #putting the x, y, size values of each centre in a tuple
+    centre_pairs=list(centers_coords) #getting those tuples in a list
+
+    cropped_thumbs=[]
+    i=0
+    for x,y,size in centre_pairs: #generating the cricle crop by creating a separate black background with awhite circle which is the alpha channel and superimposing the RGB channel
+        img_cropped=img_rgb.crop((x,y,x+size/2,y+size/2)) 
+        alpha =Image.new('L',img_cropped.size)
+        alpha_draw=ImageDraw.Draw(alpha)
+        wc,hc=img_cropped.size
+        alpha_draw.ellipse((0,0,wc,hc),fill=255)
+        img_cropped.putalpha(alpha)
+        cropped_thumbs.append(np.array(img_cropped).view(np.uint32)[::-1]) #putting all the values in an array
+    
+    centers['thumbnails']=cropped_thumbs
+    centers['FixationDuration']=centers['FixationDuration']/5 #resizing for a better look
+    ds=ColumnDataSource(centers)
+
+    plot_eyeclouds = figure(plot_width =1000 , plot_height=700, match_aspect=True)
+    plot_eyeclouds.xgrid.visible = False
+    plot_eyeclouds.ygrid.visible = False
+    plot_eyeclouds.xaxis.visible = False
+    plot_eyeclouds.xaxis.visible = False
+    plot_eyeclouds.image_rgba(image='thumbnails', x='MappedFixationPointX', y='MappedFixationPointY', dw='FixationDuration', dh='FixationDuration', source=ds) #trying to draw the points
+
+    script_eyeclouds, div_eyeclouds = components(plot_eyeclouds, wrap_script=False)
+
+    return render_template('layout.html',script_gazeplot=script_gazeplot, div_gazeplot=div_gazeplot, script_gazestripe=script_gazestripe, div_gazestripe=div_gazestripe, script_heatmap=script_heatmap, div_heatmap=div_heatmap,script_eyeclouds=script_eyeclouds,div_eyeclouds=div_eyeclouds)
 
 if __name__=="__main__":
     app.run(debug=True)
