@@ -6,19 +6,6 @@
 
 {% block body %}
 
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Data visualizer - Home</title>
-
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta name="viewport" content="width=device-width">
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css?family=Lexend+Giga|Montserrat&display=swap" rel="stylesheet">
-
-</head>
-<body>
-
 <div class="banner">
   <nav>
     <ul>
@@ -44,13 +31,11 @@
 
   <h3>Please upload a CSV file</h3>
   <div class="drag-n-drop-container content-wrap">
-    <form action="/upload_file.php">
-      <input type="file" name="filename" id="myFile">
-      <input type="submit">
+    <form method="Post" name="aform"action="/" enctype="multipart/form-data">
+      <input type="file" name="file"/>
+      <input type="submit" name="asubmit" value ="Upload"/>
     </form>
   </div>
 </div>
-
-</body>
-</html>
+{% endblock %}
 
