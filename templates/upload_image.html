@@ -7,17 +7,27 @@
 {% block body %}
 
 
-</form>
-<h2>Upload the desired stimuli image</h2>
-<form method ="post" name="bform" enctype="multipart/form-data">
-    <dl>
-      <p>
-        <input type="file" name="file"/>
+<nav>
+  <ul>
+    <li class="nav_li nav_li-selected">Home</li>
+    <li class="nav_li">Upload</li>
+    <li class="nav_li">Contact</li>
+  </ul>
+</nav>
+<div class="content-container">
+  <h3>Please upload the desired stimuli image</h3>
+  <div class="drag-n-drop-container content-wrap">
+    <form method ="post" name="bform" enctype="multipart/form-data">
+        <dl>
+          <p>
+            <input type="file" name="file"/>
+          </p>
+        </dl>
+        <p>
+        <input type="submit"  name="bsubmit" value ="Upload"/>
       </p>
-    </dl>
-    <p>
-    <input type="submit"  name="bsubmit" value ="Upload"/>
-  </p>
-  </form>
+    </form>
+  </div>
+</div>
 
 {% endblock %}
