@@ -16,7 +16,7 @@ HTML+CSS+Javascript-Frontend
 
 ## What Libraries did we use (Check the 'how to install' section on how to install them)
 
-1.Backend:
+1.**Backend**:
 
 -Pandas
 
@@ -38,7 +38,7 @@ HTML+CSS+Javascript-Frontend
 
 
 
-2.Frontend:
+2.**Frontend**:
 
 -BootstrapVue (It's a combination of Bootstrap (CSS) with Vue (Javascript))
 
