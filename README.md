@@ -8,7 +8,7 @@ Python (version 3.8)-Backend
 
 HTML+CSS+Javascript-Frontend
 
-## What Libraries did we use (Check the 'how to install' section on how to install them)
+## What Libraries did we use
 
 1.**Backend**:
 
