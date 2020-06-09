@@ -82,8 +82,8 @@ plot_eyeclouds.xgrid.visible = False
 plot_eyeclouds.ygrid.visible = False
 plot_eyeclouds.xaxis.visible = False
 plot_eyeclouds.xaxis.visible = False
-plot_eyeclouds.background_fill_color = 'black'
-plot_eyeclouds.background_fill_alpha = 0.8
+plot_eyeclouds.background_fill_color = 'turquoise'
+plot_eyeclouds.background_fill_alpha = 0.2
 plot_eyeclouds.image_rgba(image='thumbnails', x='MappedFixationPointX', y='MappedFixationPointY', dw='FixationDuration', dh='FixationDuration', source=ds) #trying to draw the points
 
 show(plot_eyeclouds)
