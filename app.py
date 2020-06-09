@@ -93,7 +93,8 @@ def graph_generate(stimuli,dataset):
     data=pd.read_csv(data_url,encoding = "latin1",delim_whitespace=True)
 
     stimuli_filter=data['StimuliName']==stimuli
-    mapped=data[stimuli_filter]
+    color = data['description']=='color'
+    mapped=data[stimuli_filter&color]
 
     user_array=mapped['user'].unique()
 
@@ -289,7 +290,13 @@ def graph_generate(stimuli,dataset):
 
     script_eyeclouds, div_eyeclouds = components(plot_eyeclouds, wrap_script=False)
 
-    return render_template('layout.html',script_gazeplot=script_gazeplot, div_gazeplot=div_gazeplot, script_gazestripe=script_gazestripe, div_gazestripe=div_gazestripe, script_heatmap=script_heatmap, div_heatmap=div_heatmap,script_eyeclouds=script_eyeclouds,div_eyeclouds=div_eyeclouds)
+    return render_template(
+                            'layout.html',
+                            script_gazeplot=script_gazeplot, div_gazeplot=div_gazeplot, 
+                            script_gazestripe=script_gazestripe, div_gazestripe=div_gazestripe, 
+                            script_heatmap=script_heatmap, div_heatmap=div_heatmap,
+                            script_eyeclouds=script_eyeclouds,div_eyeclouds=div_eyeclouds
+                            )
 
 if __name__=="__main__":
     app.run(debug=True)
