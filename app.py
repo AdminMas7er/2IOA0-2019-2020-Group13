@@ -224,13 +224,13 @@ def graph_generate(stimuli,dataset):
 
     #start of eye clouds code
 
-    img =  Image.open(stimuli_path)
+    img =  Image.open(stimuli_path) 
     img_rgb = img.convert('RGB') #converting the image in RGB values
 
     Cluster_map=mapped[['MappedFixationPointX','MappedFixationPointY','FixationDuration']].copy() #creating a separate dataframe for the clustering
 
-    km=KMeans(n_clusters=6) #number of clusters
-    km.fit(Cluster_map) #fitting the cluster on each one
+    km=KMeans(n_clusters=7) #number of clusters
+    km.fit(Cluster_map)
     centers=pd.DataFrame(km.cluster_centers_,columns=Cluster_map.columns) #generating the centre of each cluster
     centers_coords=centers[['MappedFixationPointX','MappedFixationPointY','FixationDuration']].itertuples(index=False,name=None)  #putting the x, y, size values of each centre in a tuple
     centre_pairs=list(centers_coords) #getting those tuples in a list
@@ -244,17 +244,47 @@ def graph_generate(stimuli,dataset):
         wc,hc=img_cropped.size
         alpha_draw.ellipse((0,0,wc,hc),fill=255)
         img_cropped.putalpha(alpha)
-        cropped_thumbs.append(np.array(img_cropped).view(np.uint32)[::-1]) #putting all the values in an array
-    
+
+        cropped_thumbs.append(np.array(img_cropped).view(np.uint32)[::-1]) 
     centers['thumbnails']=cropped_thumbs
-    centers['FixationDuration']=centers['FixationDuration']/5 #resizing for a better look
-    ds=ColumnDataSource(centers)
+
+    centers['FixationDuration']=centers['FixationDuration']/6.25 #resizing each image
+
+    sorted_centers_raw = centers.sort_values(by = 'FixationDuration', ascending = False)
+    sorted_centers = sorted_centers_raw.reset_index()
+
+    circle_1d = sorted_centers['FixationDuration'][0]
+    circle_2d = sorted_centers['FixationDuration'][1]
+    circle_3d = sorted_centers['FixationDuration'][2]
+    circle_4d = sorted_centers['FixationDuration'][3]
+    circle_5d = sorted_centers['FixationDuration'][4]
+    circle_6d = sorted_centers['FixationDuration'][5]
+    circle_7d = sorted_centers['FixationDuration'][6]
+
+    sorted_centers['MappedFixationPointX'][0] = 500
+    sorted_centers['MappedFixationPointY'][0] = 500
+    sorted_centers['MappedFixationPointX'][1] = 500 + (0.5 * circle_1d) - (0.5 * circle_2d)
+    sorted_centers['MappedFixationPointY'][1] = 500 + circle_1d
+    sorted_centers['MappedFixationPointX'][2] = 500 + ((14/15) * circle_1d)
+    sorted_centers['MappedFixationPointY'][2] = 500 + ((2/3) * circle_1d)
+    sorted_centers['MappedFixationPointX'][3] = 500 + ((14/15) * circle_1d)
+    sorted_centers['MappedFixationPointY'][3] = 500 + ((1/3) * circle_1d) - circle_4d
+    sorted_centers['MappedFixationPointX'][4] = 500 + (0.5 * circle_1d) - (0.5 * circle_5d)
+    sorted_centers['MappedFixationPointY'][4] = 500 - circle_5d
+    sorted_centers['MappedFixationPointX'][5] = 500 - ((1.5/10) * circle_1d)
+    sorted_centers['MappedFixationPointY'][5] = 500 + ((1/3) * circle_1d) - circle_6d
+    sorted_centers['MappedFixationPointX'][6] = 500 - ((1.5/10) * circle_1d)
+    sorted_centers['MappedFixationPointY'][6] = 500 + ((2/3) * circle_1d) 
+
+    ds = ColumnDataSource(sorted_centers)
 
     plot_eyeclouds = figure(plot_width =1000 , plot_height=700, match_aspect=True)
     plot_eyeclouds.xgrid.visible = False
     plot_eyeclouds.ygrid.visible = False
     plot_eyeclouds.xaxis.visible = False
     plot_eyeclouds.xaxis.visible = False
+    plot_eyeclouds.background_fill_color = 'turquoise'
+    plot_eyeclouds.background_fill_alpha = 0.2
     plot_eyeclouds.image_rgba(image='thumbnails', x='MappedFixationPointX', y='MappedFixationPointY', dw='FixationDuration', dh='FixationDuration', source=ds) #trying to draw the points
 
     script_eyeclouds, div_eyeclouds = components(plot_eyeclouds, wrap_script=False)
