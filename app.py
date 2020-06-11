@@ -14,7 +14,7 @@ from PIL import Image,ImageDraw
 from bokeh.plotting import figure
 from bokeh.palettes import turbo
 from bokeh.embed import components
-from bokeh.models import FuncTickFormatter, ColumnDataSource, HoverTool
+from bokeh.models import FuncTickFormatter, ColumnDataSource, HoverTool,UndoTool, RedoTool,ZoomInTool, ZoomOutTool
 
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
 
@@ -249,19 +249,26 @@ def graph_generate(stimuli,dataset):
         cropped_thumbs.append(np.array(img_cropped).view(np.uint32)[::-1]) 
     centers['thumbnails']=cropped_thumbs
 
-    centers['FixationDuration']=centers['FixationDuration']/6.25 #resizing each image
-
-    sorted_centers_raw = centers.sort_values(by = 'FixationDuration', ascending = False)
+    centers['FixationDurationAdjusted']=centers['FixationDuration']/6.25 #resizing each image
+   
+   # Sorting the dataset based from high Fixation Duration to low Fixation Duration
+    sorted_centers_raw = centers.sort_values(by = 'FixationDurationAdjusted', ascending = False)
     sorted_centers = sorted_centers_raw.reset_index()
 
-    circle_1d = sorted_centers['FixationDuration'][0]
-    circle_2d = sorted_centers['FixationDuration'][1]
-    circle_3d = sorted_centers['FixationDuration'][2]
-    circle_4d = sorted_centers['FixationDuration'][3]
-    circle_5d = sorted_centers['FixationDuration'][4]
-    circle_6d = sorted_centers['FixationDuration'][5]
-    circle_7d = sorted_centers['FixationDuration'][6]
+   # Determining diameter of each circle
+    circle_1d = sorted_centers['FixationDurationAdjusted'][0]
+    circle_2d = sorted_centers['FixationDurationAdjusted'][1]
+    circle_3d = sorted_centers['FixationDurationAdjusted'][2]
+    circle_4d = sorted_centers['FixationDurationAdjusted'][3]
+    circle_5d = sorted_centers['FixationDurationAdjusted'][4]
+    circle_6d = sorted_centers['FixationDurationAdjusted'][5]
+    circle_7d = sorted_centers['FixationDurationAdjusted'][6]
 
+    # Saving X and Y coordinates for Hovertool under new names
+    sorted_centers['OriginalMappedFixationPointX'] = sorted_centers['MappedFixationPointX']
+    sorted_centers['OriginalMappedFixationPointY'] = sorted_centers['MappedFixationPointY']
+    
+    #Reassigning values X and Y coordinates for reformation of the circles
     sorted_centers['MappedFixationPointX'][0] = 500
     sorted_centers['MappedFixationPointY'][0] = 500
     sorted_centers['MappedFixationPointX'][1] = 500 + (0.5 * circle_1d) - (0.5 * circle_2d)
@@ -279,15 +286,30 @@ def graph_generate(stimuli,dataset):
 
     ds = ColumnDataSource(sorted_centers)
 
+    # Creating the plot of the visualization
     plot_eyeclouds = figure(plot_width =1000 , plot_height=700, match_aspect=True)
+    
+    # Adjusting the grid
     plot_eyeclouds.xgrid.visible = False
     plot_eyeclouds.ygrid.visible = False
     plot_eyeclouds.xaxis.visible = False
     plot_eyeclouds.xaxis.visible = False
+    
+    # Adjusting the background
     plot_eyeclouds.background_fill_color = 'turquoise'
     plot_eyeclouds.background_fill_alpha = 0.2
-    plot_eyeclouds.image_rgba(image='thumbnails', x='MappedFixationPointX', y='MappedFixationPointY', dw='FixationDuration', dh='FixationDuration', source=ds) #trying to draw the points
+    
+    # Adding Tools 
+    plot_eyeclouds.add_tools(UndoTool())
+    plot_eyeclouds.add_tools(RedoTool())
+    plot_eyeclouds.add_tools(ZoomInTool())
+    plot_eyeclouds.add_tools(ZoomOutTool())
+    plot_eyeclouds.add_tools(HoverTool(tooltips=[('X-Coordinate of Fixation', '@OriginalMappedFixationPointX'), ('Y-Coordinate of Fixation', '@OriginalMappedFixationPointY'), ('Total Duration of Fixation', '@FixationDuration')]))
 
+    # Creating RGB images inside the plot
+    plot_eyeclouds.image_rgba(image='thumbnails', x='MappedFixationPointX', y='MappedFixationPointY', dw='FixationDurationAdjusted', dh='FixationDurationAdjusted', source=ds) #trying to draw the points
+
+    #generating the components where the graph will be rendered
     script_eyeclouds, div_eyeclouds = components(plot_eyeclouds, wrap_script=False)
 
     return render_template(
