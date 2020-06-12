@@ -18,7 +18,7 @@ from bokeh.models import FuncTickFormatter, ColumnDataSource, HoverTool,UndoTool
 
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
 
-app=Flask(__name__,static_folder='uploads')
+app=Flask(__name__,static_folder='static')
 app.secret_key = "key"
 #configuring the upload folder and the maximum size
 
@@ -293,7 +293,7 @@ def graph_generate(stimuli,dataset):
     plot_eyeclouds.xgrid.visible = False
     plot_eyeclouds.ygrid.visible = False
     plot_eyeclouds.xaxis.visible = False
-    plot_eyeclouds.xaxis.visible = False
+    plot_eyeclouds.yaxis.visible = False
     
     # Adjusting the background
     plot_eyeclouds.background_fill_color = 'turquoise'
