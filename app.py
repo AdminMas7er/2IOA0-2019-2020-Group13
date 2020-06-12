@@ -8,7 +8,7 @@ import cv2
 import scipy.ndimage.filters as filters
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
-from  flask import Flask, flash, render_template, request, redirect, url_for, request
+from  flask import Flask, flash, render_template, request, redirect, url_for, request,send_from_directory
 from werkzeug.utils import secure_filename
 from PIL import Image,ImageDraw
 from bokeh.plotting import figure
@@ -29,7 +29,7 @@ stimuli=""
 stimuli_url=""
 data_url=""
 
-UPLOAD_FOLDER=os.path.join(app.root_path,'uploads')
+UPLOAD_FOLDER=os.path.join(app.root_path,'static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and \
@@ -81,15 +81,15 @@ def data_received(stimuli,dataset):
     ip_address=request.remote_addr
     data_url = os.path.join(app.config['UPLOAD_FOLDER'],dataset)
     stimuli_path = os.path.join(app.config['UPLOAD_FOLDER'],stimuli)
-    
-    img_url='http://'+ip_address+':5000/uploads/'+stimuli+'/'
+    img_url='http://'+ip_address+':5000/static/'+stimuli+'/'
   
-    return (ip_address,stimuli_path,img_url,data_url)
+    return (ip_address,img_url,data_url,stimuli_path)
+
 
 @app.route('/graph_generate/<dataset>/<stimuli>/')
 def graph_generate(stimuli,dataset):
     
-    ip_address,stimuli_path,img_url,data_url=data_received(stimuli,dataset)
+    ip_address,img_url,data_url,stimuli_path=data_received(stimuli,dataset)
     data=pd.read_csv(data_url,encoding = "latin1",delim_whitespace=True)
 
     stimuli_filter=data['StimuliName']==stimuli
