@@ -27,19 +27,24 @@
     <div id="tab">
       <b-card no-body>
         <b-tabs card>
-            <b-tab no-body title="Gaze plot">
-                {{div_gazeplot|safe}}
-
+          <b-tab  title="Gaze plot">
+            <b-card-header> Description of Gaze plot goes here </b-card-header>
+            {{div_gazeplot|safe}}
           </b-tab>
-          <b-tab no-body title="Gaze Stripe">
+          <b-tab title="Gaze Stripe">
+            <b-card-header> Description of Gaze Stripe goes here</b-card-header>
             {{div_gazestripe|safe}}
           </b-tab>
           <b-tab title="Heat Map">
-            {{div_heatmap|safe}}
+           <b-card-header> Description of Heat Map goes here</b-card-header>
+           {{div_heatmap|safe}}
           </b-tab>
           <b-tab title="Eye Clouds">
+           <b-card-header> Description of Eye Clouds goes here</b-card-header>
             {{div_eyeclouds|safe}}
+          </b-tab>
             </b-tab>
+            <b-tab title="Press the 'Back' button on your browser to upload another visualization!" disabled></b-tab>
         </b-tabs>
       </b-card>
     </div>
