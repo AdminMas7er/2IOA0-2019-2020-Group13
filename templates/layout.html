@@ -28,19 +28,23 @@
       <b-card no-body>
         <b-tabs card>
           <b-tab  title="Gaze plot">
-            <b-card-header> Description of Gaze plot goes here </b-card-header>
+            <b-card-header> Shows the connection between all the points that users have viewed. The more often a region has been
+              looked at, the larger the circle around the point is. </b-card-header>
             {{div_gazeplot|safe}}
           </b-tab>
           <b-tab title="Gaze Stripe">
-            <b-card-header> Description of Gaze Stripe goes here</b-card-header>
+            <b-card-header> Shows the eye-tracked path that the user followed through images; each point they viewed has been
+              represented by a 100x100 region around it.</b-card-header>
             {{div_gazestripe|safe}}
           </b-tab>
           <b-tab title="Heat Map">
-           <b-card-header> Description of Heat Map goes here</b-card-header>
+           <b-card-header> Displays the areas where multiple users have looked. The more often a region has been looked at, the 
+            darker the region becomes.</b-card-header>
            {{div_heatmap|safe}}
           </b-tab>
           <b-tab title="Eye Clouds">
-           <b-card-header> Description of Eye Clouds goes here</b-card-header>
+           <b-card-header> Shows the regions the users have looked at through images, with the center image displayed being the region
+            most viewed by users..</b-card-header>
             {{div_eyeclouds|safe}}
           </b-tab>
             </b-tab>
