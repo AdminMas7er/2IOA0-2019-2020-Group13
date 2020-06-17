@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Visualizations</title>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.0.2.min.js"></script>
+    
+        <script type="text/javascript">
+            Bokeh.set_log_level("info");
+        </script>
+        <link
+        type="text/css"
+        rel="stylesheet"
+        href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css"
+      />
+      <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css"
+    />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"></script>
+    <script src="https://unpkg.com/vue@latest/dist/vue.js"></script>
+    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+  </head>
+  <body>
+    <div id="tab">
+      <b-card no-body>
+        <b-tabs card>
+            <b-tab no-body title="Gaze plot">
+              <br>
+              <h7>Shows the connection between all the points that users have viewed. The more often a region has been
+                looked at, the larger the circle around the point is.
+                </h7>
+                <br>
+                {{div_gazeplot|safe}}
+
+          </b-tab>
+          <b-tab title="Heat Map">
+            <br>
+            <h7>Displays the areas where multiple users have looked. The more often a region has been looked at, the 
+              darker the region becomes.
+            </h7>
+            <br>
+            {{div_heatmap|safe}}
+          </b-tab>
+          <b-tab no-body title="Gaze Stripe">
+            <br>
+            <h7>Shows the eye-tracked path that the user followed through images; each point they viewed has been
+              represented by a 100x100 region around it.
+              </h7>
+              <br>
+            {{div_gazestripe|safe}}
+          </b-tab>
+          <b-tab title="Eye Clouds">
+            <br>
+            <h7>Shows the regions the users have looked at through images, with the center image displayed being the region
+              most viewed by users.
+            </h7>
+            <br>
+            {{div_eyeclouds|safe}}
+            </b-tab>
+        </b-tabs>
+      </b-card>
+    </div>
+
+    <script> 
+      {{script_gazeplot|safe}}
+    </script>
+     <script>
+      {{script_heatmap|safe}}
+    </script>
+    <script> 
+      {{script_gazestripe|safe}}
+    </script>
+    <script> 
+      {{script_eyeclouds|safe}}
+    </script>
+  </body>
+  
+    
+    <script>
+    var app=new Vue( {
+      el:'#tab',
+      props: {
+        plot: Object
+      },
+      ready () {
+        eval(this.plot_script)
+      }
+    })
+    </script>
+</html>
