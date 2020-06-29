@@ -14,7 +14,7 @@ from PIL import Image,ImageDraw
 from bokeh.plotting import figure
 from bokeh.palettes import turbo
 from bokeh.embed import components
-from bokeh.models import FuncTickFormatter, ColumnDataSource, HoverTool,UndoTool, RedoTool,ZoomInTool, ZoomOutTool
+from bokeh.models import FuncTickFormatter, ColumnDataSource, HoverTool,UndoTool, RedoTool,ZoomInTool, ZoomOutTool,LassoSelectTool
 
 ALLOWED_EXTENSIONS = {'csv','jpg', 'jpeg'}
 
@@ -27,7 +27,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 stimuli=""
 stimuli_url=""
-data_url=""
+data_path=""
 
 UPLOAD_FOLDER=os.path.join(app.root_path,'static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -79,18 +79,18 @@ def csv_file(dataset): #file uploaded is a csv file, and image needs to be uploa
 
 def data_received(stimuli,dataset):
     ip_address=request.remote_addr
-    data_url = os.path.join(app.config['UPLOAD_FOLDER'],dataset)
+    data_path = os.path.join(app.config['UPLOAD_FOLDER'],dataset)
     stimuli_path = os.path.join(app.config['UPLOAD_FOLDER'],stimuli)
     img_url='http://'+ip_address+':5000/static/'+stimuli+'/'
   
-    return (ip_address,img_url,data_url,stimuli_path)
+    return (ip_address,img_url,data_path,stimuli_path)
 
 
 @app.route('/graph_generate/<dataset>/<stimuli>/')
 def graph_generate(stimuli,dataset):
     
-    ip_address,img_url,data_url,stimuli_path=data_received(stimuli,dataset)
-    data=pd.read_csv(data_url,encoding = "latin1",delim_whitespace=True)
+    ip_address,img_url,data_path,stimuli_path=data_received(stimuli,dataset)
+    data=pd.read_csv(data_path,encoding = "latin1",delim_whitespace=True)
 
     stimuli_filter=data['StimuliName']==stimuli
     color = data['description']=='color'
@@ -300,6 +300,7 @@ def graph_generate(stimuli,dataset):
     plot_eyeclouds.background_fill_alpha = 0.2
     
     # Adding Tools 
+    plot_eyeclouds.add_tools(LassoSelectTool())
     plot_eyeclouds.add_tools(UndoTool())
     plot_eyeclouds.add_tools(RedoTool())
     plot_eyeclouds.add_tools(ZoomInTool())
@@ -321,4 +322,4 @@ def graph_generate(stimuli,dataset):
                             )
 
 if __name__=="__main__":
-    app.run(debug=True)
+   app.run(debug=True)
