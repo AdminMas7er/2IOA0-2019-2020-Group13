@@ -7,6 +7,7 @@ import time
 import cv2
 import scipy.ndimage.filters as filters
 import matplotlib.pyplot as plt
+
 from sklearn.cluster import KMeans
 from  flask import Flask, flash, render_template, request, redirect, url_for, request,send_from_directory
 from werkzeug.utils import secure_filename
@@ -88,7 +89,8 @@ def data_received(stimuli,dataset):
 
 @app.route('/graph_generate/<dataset>/<stimuli>/')
 def graph_generate(stimuli,dataset):
-    
+    start = time.process_time()
+
     ip_address,img_url,data_path,stimuli_path=data_received(stimuli,dataset)
     data=pd.read_csv(data_path,encoding = "latin1",delim_whitespace=True)
 
@@ -312,6 +314,8 @@ def graph_generate(stimuli,dataset):
 
     #generating the components where the graph will be rendered
     script_eyeclouds, div_eyeclouds = components(plot_eyeclouds, wrap_script=False)
+    
+    print("Time taken to process visualizations is " + str(time.process_time() - start) + " seconds", flush=True)
 
     return render_template(
                             'layout.html',
